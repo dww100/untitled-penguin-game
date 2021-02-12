@@ -1,2 +1,3 @@
-# untitled-penguin-game
-A game about a penguine an snowbees, just as god intended
+# Untitled Penguin Game
+
+A game about a penguin and snowbees, just as god intended
