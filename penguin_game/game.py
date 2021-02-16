@@ -117,8 +117,10 @@ class Game:
                     waiting = False
                     self.state = State.PLAY
 
-    def show_game_over_screen(self):
-        """"""
+    def show_game_over_screen(self) -> None:
+        """Show a game over screen and allow game to be restarted.
+        """
+        pass
 
     def run_game(self) -> None:
         """Execute main game loop
