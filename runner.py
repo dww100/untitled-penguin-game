@@ -1,5 +1,5 @@
 import logging
-from basicgame.game import Game
+from penguin_game.game import Game
 
 logging.basicConfig(level=logging.DEBUG)
 
