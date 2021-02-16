@@ -18,7 +18,7 @@ TILE_SIZE = 64
 GRID_WIDTH = 12
 GRID_HEIGHT = 12
 # Dimensions of the game space in pixels
-WIDTH = GRID_WIDTH * TILE_SIZE 
+WIDTH = GRID_WIDTH * TILE_SIZE
 HEIGHT = GRID_HEIGHT * TILE_SIZE
 
 # Player settings

@@ -10,7 +10,7 @@ from .entities import Actor
 class Player(Actor):
     def __init__(
         self,
-        game: 'penguin_game.game.Game',
+        game: "penguin_game.game.Game",
         x: int,
         y: int,
         additional_groups: Union[pg.sprite.Group, List[pg.sprite.Group], None] = None,

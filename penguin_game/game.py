@@ -5,7 +5,18 @@ from typing import Optional, Tuple
 
 import pygame as pg
 
-from .settings import HEIGHT, WIDTH, GRID_HEIGHT, GRID_WIDTH, FPS, TILE_SIZE, BG_COLOR, LIGHT_GREY, WHITE, TITLE
+from .settings import (
+    HEIGHT,
+    WIDTH,
+    GRID_HEIGHT,
+    GRID_WIDTH,
+    FPS,
+    TILE_SIZE,
+    BG_COLOR,
+    LIGHT_GREY,
+    WHITE,
+    TITLE,
+)
 from .actors import Player
 from .entities import Wall
 
@@ -29,6 +40,7 @@ class Game:
         walls (Optional[pg.sprite.Group]): Group of sprites defining edge of game area [None outside game loop].
         state (State): What state is the game in - MENU, PLAY or GAME_OVER.
     """
+
     def __init__(self):
 
         pg.init()
@@ -79,7 +91,9 @@ class Game:
             if self.state == State.PLAY:
                 self.run_game()
 
-    def draw_text(self, text: str, size: int, color: Tuple[int, int, int], x: int, y: int) -> None:
+    def draw_text(
+        self, text: str, size: int, color: Tuple[int, int, int], x: int, y: int
+    ) -> None:
         """Draw some text to the pygame screen.
 
         Args:

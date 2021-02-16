@@ -15,7 +15,7 @@ class Axis(Enum):
 
 
 class Wall(Sprite):
-    def __init__(self, game: 'penguin_game.game.Game', x: int, y: int) -> None:
+    def __init__(self, game: "penguin_game.game.Game", x: int, y: int) -> None:
         """Sprite class to describe bounding wall elements.
 
         Args:
@@ -38,7 +38,7 @@ class Wall(Sprite):
 class Actor(Sprite):
     def __init__(
         self,
-        game: 'penguin_game.game.Game',
+        game: "penguin_game.game.Game",
         x: int,
         y: int,
         additional_groups: Union[pg.sprite.Group, List[pg.sprite.Group], None] = None,
