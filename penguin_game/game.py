@@ -1,11 +1,11 @@
 import logging
 import sys
 from enum import Enum
-from typing import Optional
+from typing import Optional, Tuple
 
 import pygame as pg
 
-from .settings import HEIGHT, WIDTH, GRID_HEIGHT, GRID_WIDTH, FPS, TILE_SIZE, BG_COLOR, LIGHT_GREY
+from .settings import HEIGHT, WIDTH, GRID_HEIGHT, GRID_WIDTH, FPS, TILE_SIZE, BG_COLOR, LIGHT_GREY, WHITE, TITLE
 from .actors import Player
 from .entities import Wall
 
@@ -71,10 +71,60 @@ class Game:
         sys.exit()
 
     def run(self) -> None:
+        while True:
+            if self.state == State.MENU:
+                self.show_menu()
+            if self.state == State.GAME_OVER:
+                self.show_game_over_screen()
+            if self.state == State.PLAY:
+                self.run_game()
+
+    def draw_text(self, text: str, size: int, color: Tuple[int, int, int], x: int, y: int) -> None:
+        """Draw some text to the pygame screen.
+
+        Args:
+            text: Text to put on the screen
+            size: Text size - height in pixels.
+            color: Tuple containing the RGB values for the colour to use when rendering text.
+            x: X coordinate of the middle top of the text.
+            y: Y coordinate of the middle top of the text.
+        """
+        # TODO: Select and use a better font
+        font = pg.font.Font(pg.font.get_default_font(), size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.midtop = (x, y)
+        self.screen.blit(text_surface, text_rect)
+
+    def show_menu(self) -> None:
+        """Display start screen/menu.
+        """
+        self.screen.fill(BG_COLOR)
+        self.draw_text(TITLE, 48, WHITE, WIDTH / 2, HEIGHT / 4)
+        self.draw_text("Arrows to move", 22, WHITE, WIDTH / 2, HEIGHT / 2)
+        self.draw_text("Press a key to play", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
+        self.draw_text("Esc to Quit", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4 + 30)
+        pg.display.flip()
+
+        # Wait for a key press.
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.quit()
+                if event.type == pg.KEYUP:
+                    waiting = False
+                    self.state = State.PLAY
+
+    def show_game_over_screen(self):
+        """"""
+
+    def run_game(self) -> None:
         """Execute main game loop
         """
 
-        self.state = State.PLAY
+        self.setup_play()
 
         while self.state == State.PLAY:
             # Using clock.tick each loop ensures framerate is limited to target FPS

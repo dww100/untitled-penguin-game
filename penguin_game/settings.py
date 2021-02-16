@@ -1,4 +1,4 @@
-TITLE = "Untitled Demo"
+TITLE = "Untitled Penguin Game"
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
