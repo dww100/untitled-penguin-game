@@ -48,7 +48,7 @@ class Player(Actor):
     def get_keys(self) -> None:
         """Handle keyboard input.
         """
-        self.vel.x, self.vel.y = 0, 0
+        self.vel = Vector2(0, 0)
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT]:
             self.vel.x = -PLAYER_SPEED
@@ -73,7 +73,6 @@ class Player(Actor):
         Checks for user input, then handles movement and wall collisions.
 
         """
-        self.last_vel = self.vel
         self.get_keys()
         super().update()
 
