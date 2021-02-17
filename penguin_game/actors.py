@@ -51,17 +51,17 @@ class Player(Actor):
         self.vel = Vector2(0, 0)
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT]:
-            self.vel.x = -PLAYER_SPEED
             self.facing = Vector2(-1, 0)
+            self.vel = self.facing * PLAYER_SPEED
         if keys[pg.K_RIGHT]:
-            self.vel.x = PLAYER_SPEED
             self.facing = Vector2(1, 0)
+            self.vel = self.facing * PLAYER_SPEED
         if keys[pg.K_UP]:
-            self.vel.y = -PLAYER_SPEED
             self.facing = Vector2(0, -1)
+            self.vel = self.facing * PLAYER_SPEED
         if keys[pg.K_DOWN]:
-            self.vel.y = PLAYER_SPEED
             self.facing = Vector2(0, 1)
+            self.vel = self.facing * PLAYER_SPEED
         if keys[pg.K_SPACE]:
             self.fire()
 
