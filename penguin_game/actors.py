@@ -42,7 +42,8 @@ class Player(Actor):
         """
         super().__init__(game, x, y, additional_groups=game.player)
         self.stopped_by.append(game.blocks)
-        self.last_vel = Vector2(0, 0)
+        # Start facing left
+        self.facing = Vector2(-1, 0)
 
     def get_keys(self) -> None:
         """Handle keyboard input.
@@ -51,12 +52,16 @@ class Player(Actor):
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT]:
             self.vel.x = -PLAYER_SPEED
+            self.facing = Vector2(-1, 0)
         if keys[pg.K_RIGHT]:
             self.vel.x = PLAYER_SPEED
+            self.facing = Vector2(1, 0)
         if keys[pg.K_UP]:
             self.vel.y = -PLAYER_SPEED
+            self.facing = Vector2(0, -1)
         if keys[pg.K_DOWN]:
             self.vel.y = PLAYER_SPEED
+            self.facing = Vector2(0, 1)
         if keys[pg.K_SPACE]:
             self.fire()
 
