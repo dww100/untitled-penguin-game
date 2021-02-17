@@ -10,8 +10,8 @@ from .settings import TILE_SIZE, GREEN, YELLOW
 
 
 class Axis(Enum):
-    X = 1
-    Y = 2
+    X = 0
+    Y = 1
 
 
 class Wall(Sprite):
@@ -69,14 +69,17 @@ class Actor(Sprite):
         self.y = y * TILE_SIZE
         self.vx, self.vy = 0, 0
 
-    def collide_with_walls(self, direction: Axis = Axis.X) -> None:
+        self.stopped_by = [self.game.walls]
+
+    def collide_and_stop(self, check_group: pg.sprite.Group, direction: Axis = Axis.X) -> bool:
         """Handle collisions with a wall when moving along specified axis.
 
         Args:
+            check_group: Sprite group to use in collision check.
             direction: Which axis are we checking for collisions along.
         """
 
-        hits = pg.sprite.spritecollide(self, self.game.walls, False)
+        hits = pg.sprite.spritecollide(self, check_group, False)
         if hits:
             if direction == Axis.X:
 
@@ -96,6 +99,12 @@ class Actor(Sprite):
                 self.vy = 0
                 self.rect.y = self.y
 
+            return True
+
+        else:
+
+            return False
+
     def update(self) -> None:
         """Update state each time round the game loop.
         Handles movement and wall collisions.
@@ -107,8 +116,13 @@ class Actor(Sprite):
 
         self.x += dx
         self.rect.x = self.x
-        self.collide_with_walls(Axis.X)
+        for stopper in self.stopped_by:
+            self.collide_and_stop(stopper, Axis.X)
 
         self.y += dy
         self.rect.y = self.y
-        self.collide_with_walls(Axis.Y)
+        for stopper in self.stopped_by:
+            self.collide_and_stop(stopper, Axis.Y)
+
+    def die(self):
+        self.remove(self.groups)
