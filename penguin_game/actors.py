@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Union, List
 import pygame as pg
+from pygame.math import Vector2
 
 from .settings import PLAYER_SPEED, RED
 from .entities import Actor
@@ -41,22 +42,21 @@ class Player(Actor):
         """
         super().__init__(game, x, y, additional_groups=game.player)
         self.stopped_by.append(game.blocks)
-        self.last_vx = 0
-        self.last_vy = 0
+        self.last_vel = Vector2(0, 0)
 
     def get_keys(self) -> None:
         """Handle keyboard input.
         """
-        self.vx, self.vy = 0, 0
+        self.vel.x, self.vel.y = 0, 0
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT]:
-            self.vx = -PLAYER_SPEED
+            self.vel.x = -PLAYER_SPEED
         if keys[pg.K_RIGHT]:
-            self.vx = PLAYER_SPEED
+            self.vel.x = PLAYER_SPEED
         if keys[pg.K_UP]:
-            self.vy = -PLAYER_SPEED
+            self.vel.y = -PLAYER_SPEED
         if keys[pg.K_DOWN]:
-            self.vy = PLAYER_SPEED
+            self.vel.y = PLAYER_SPEED
         if keys[pg.K_SPACE]:
             self.fire()
 
@@ -68,8 +68,7 @@ class Player(Actor):
         Checks for user input, then handles movement and wall collisions.
 
         """
-        self.last_vx = self.vx
-        self.last_vy = self.vy
+        self.last_vel = self.vel
         self.get_keys()
         super().update()
 

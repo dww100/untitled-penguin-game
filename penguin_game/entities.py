@@ -5,6 +5,7 @@ from typing import Union, List
 
 import pygame as pg
 from pygame.sprite import Sprite
+from pygame.math import Vector2
 
 from .settings import TILE_SIZE, GREEN, YELLOW
 
@@ -29,8 +30,7 @@ class Wall(Sprite):
         self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
         self.image.fill(GREEN)
         self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
+        self.pos = Vector2(x, y)
         self.rect.x = x * TILE_SIZE
         self.rect.y = y * TILE_SIZE
 
@@ -65,9 +65,10 @@ class Actor(Sprite):
         self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect()
-        self.x = x * TILE_SIZE
-        self.y = y * TILE_SIZE
-        self.vx, self.vy = 0, 0
+        self.rect.x = x * TILE_SIZE
+        self.rect.x = y * TILE_SIZE
+        self.pos = Vector2(x, y) * TILE_SIZE
+        self.vel = Vector2(0, 0)
 
         self.stopped_by = [self.game.walls]
 
@@ -83,21 +84,21 @@ class Actor(Sprite):
         if hits:
             if direction == Axis.X:
 
-                if self.vx > 0:
-                    self.x = hits[0].rect.left - self.rect.width
-                if self.vx < 0:
-                    self.x = hits[0].rect.right
-                self.vx = 0
-                self.rect.x = self.x
+                if self.vel.x > 0:
+                    self.pos.x = hits[0].rect.left - self.rect.width
+                if self.vel.x < 0:
+                    self.pos.x = hits[0].rect.right
+                self.vel.x = 0
+                self.rect.x = self.pos.x
 
             else:
 
-                if self.vy > 0:
-                    self.y = hits[0].rect.top - self.rect.height
-                if self.vy < 0:
-                    self.y = hits[0].rect.bottom
-                self.vy = 0
-                self.rect.y = self.y
+                if self.vel.y > 0:
+                    self.pos.y = hits[0].rect.top - self.rect.height
+                if self.vel.y < 0:
+                    self.pos.y = hits[0].rect.bottom
+                self.vel.y = 0
+                self.rect.y = self.pos.y
 
             return True
 
@@ -111,16 +112,13 @@ class Actor(Sprite):
         """
 
         # Scale movement to ensure reliable frame rate.
-        dx = self.vx * self.game.dt
-        dy = self.vy * self.game.dt
+        self.pos += self.vel * self.game.dt
 
-        self.x += dx
-        self.rect.x = self.x
+        self.rect.x = self.pos.x
         for stopper in self.stopped_by:
             self.collide_and_stop(stopper, Axis.X)
 
-        self.y += dy
-        self.rect.y = self.y
+        self.rect.y = self.pos.y
         for stopper in self.stopped_by:
             self.collide_and_stop(stopper, Axis.Y)
 
