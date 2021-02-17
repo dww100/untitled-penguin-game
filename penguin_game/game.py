@@ -17,7 +17,7 @@ from .settings import (
     WHITE,
     TITLE,
 )
-from .actors import Player
+from .actors import Player, Block
 from .entities import Wall
 
 LOGGER = logging.getLogger(__name__)
@@ -54,6 +54,7 @@ class Game:
         self.all_sprites = None
         self.walls = None
         self.player = None
+        self.blocks = None
 
         self.state = State.MENU
 
@@ -62,6 +63,9 @@ class Game:
         """
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
+        self.blocks = pg.sprite.Group()
+        Block(self, 5, 6)
+        Block(self, 5, 7)
         self.player = Player(self, 5, 5)
         self.make_boundary_wall()
 
