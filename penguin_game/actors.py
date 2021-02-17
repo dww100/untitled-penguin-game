@@ -3,8 +3,26 @@ from __future__ import annotations
 from typing import Union, List
 import pygame as pg
 
-from .settings import PLAYER_SPEED
+from .settings import PLAYER_SPEED, RED
 from .entities import Actor
+
+
+class Block(Actor):
+    def __init__(
+        self,
+        game: "penguin_game.game.Game",
+        x: int,
+        y: int,
+    ) -> None:
+        """Block Sprite.
+
+        Args:
+            game: Game that this Sprite is associated with (provides access to timing, etc).
+            x: Horizontal starting position in pixels.
+            y: Vertical starting position in pixels.
+        """
+        super().__init__(game, x, y, additional_groups=game.blocks)
+        self.image.fill(RED)
 
 
 class Player(Actor):
@@ -13,7 +31,6 @@ class Player(Actor):
         game: "penguin_game.game.Game",
         x: int,
         y: int,
-        additional_groups: Union[pg.sprite.Group, List[pg.sprite.Group], None] = None,
     ) -> None:
         """Player Sprite.
 
@@ -21,9 +38,11 @@ class Player(Actor):
             game: Game that this Sprite is associated with (provides access to timing, etc).
             x: Horizontal starting position in pixels.
             y: Vertical starting position in pixels.
-            additional_groups: Sprite groups other than `game.all_sprites` to be associated with.
         """
-        super().__init__(game, x, y, additional_groups=additional_groups)
+        super().__init__(game, x, y, additional_groups=game.player)
+        self.stopped_by.append(game.blocks)
+        self.last_vx = 0
+        self.last_vy = 0
 
     def get_keys(self) -> None:
         """Handle keyboard input.
@@ -38,12 +57,19 @@ class Player(Actor):
             self.vy = -PLAYER_SPEED
         if keys[pg.K_DOWN]:
             self.vy = PLAYER_SPEED
+        if keys[pg.K_SPACE]:
+            self.fire()
+
+    def fire(self):
+        pass
 
     def update(self) -> None:
         """Update state each time round the game loop.
         Checks for user input, then handles movement and wall collisions.
 
         """
+        self.last_vx = self.vx
+        self.last_vy = self.vy
         self.get_keys()
         super().update()
 
