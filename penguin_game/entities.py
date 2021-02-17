@@ -84,6 +84,7 @@ class Actor(Sprite):
         if hits:
             if direction == Axis.X:
 
+                # X axis: +ve = right, -ve = left
                 if self.vel.x > 0:
                     self.pos.x = hits[0].rect.left - self.rect.width
                 if self.vel.x < 0:
@@ -92,7 +93,7 @@ class Actor(Sprite):
                 self.rect.x = self.pos.x
 
             else:
-
+                # Y axis: +ve = down, -ve = up
                 if self.vel.y > 0:
                     self.pos.y = hits[0].rect.top - self.rect.height
                 if self.vel.y < 0:
