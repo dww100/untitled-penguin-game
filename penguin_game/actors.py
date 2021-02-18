@@ -92,10 +92,11 @@ class Player(Actor):
             x: Horizontal starting position in pixels.
             y: Vertical starting position in pixels.
         """
-        super().__init__(game, x, y, additional_groups=game.player)
+        super().__init__(game, x, y, additional_groups=None)
         self.stopped_by.append(game.blocks)
         # Start facing left
         self.facing = Vector2(-1, 0)
+        self.lives = 2
 
     def get_keys(self) -> None:
         """Handle keyboard input.
@@ -136,6 +137,8 @@ class Player(Actor):
         Checks for user input, then handles movement and wall collisions.
 
         """
+        if pg.sprite.spritecollide(self, self.game.enemies, False):
+            self.lives -= 1
         self.get_keys()
         super().update()
 
@@ -143,3 +146,4 @@ class Player(Actor):
 class Enemy(Actor):
     def __init__(self, game, x, y):
         super().__init__(game, x, y, additional_groups=game.enemies, colour=BLUE)
+

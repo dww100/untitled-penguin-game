@@ -60,7 +60,7 @@ class Actor(Sprite):
             if isinstance(additional_groups, list):
                 self.groups = additional_groups + [game.all_sprites]
             else:
-                self.groups = additional_groups, game.all_sprites
+                self.groups = [additional_groups, game.all_sprites]
 
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game

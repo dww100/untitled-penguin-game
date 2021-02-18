@@ -13,6 +13,7 @@ from .settings import (
     FPS,
     TILE_SIZE,
     BG_COLOR,
+    RED,
     LIGHT_GREY,
     WHITE,
     TITLE,
@@ -134,14 +135,37 @@ class Game:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.quit()
-                if event.type == pg.KEYUP:
-                    waiting = False
-                    self.state = State.PLAY
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        self.quit()
+                    else:
+                        self.state = State.PLAY
+                        waiting = False
 
     def show_game_over_screen(self) -> None:
         """Show a game over screen and allow game to be restarted.
         """
-        pass
+        self.screen.fill(RED)
+        self.draw_text(TITLE, 48, WHITE, WIDTH / 2, HEIGHT / 4)
+        self.draw_text("Game Over", 22, WHITE, WIDTH / 2, HEIGHT / 2)
+        self.draw_text("Press a key to return to menu", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
+        self.draw_text("Esc to Quit", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4 + 30)
+        pg.display.flip()
+
+        # Wait for a key press.
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.quit()
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        self.quit()
+                    else:
+                        waiting = False
+                        self.state = State.MENU
 
     def run_game(self) -> None:
         """Execute main game loop
@@ -155,6 +179,8 @@ class Game:
             self.events()
             self.update()
             self.draw()
+            if self.player.lives == 0:
+                self.state = State.GAME_OVER
 
     def events(self) -> None:
         """Handle events - key presses etc.
