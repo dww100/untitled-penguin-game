@@ -127,5 +127,3 @@ class Actor(Sprite):
         for stopper in self.stopped_by:
             self.collide_and_stop(stopper, Axis.Y)
 
-    def die(self):
-        self.remove(self.groups)

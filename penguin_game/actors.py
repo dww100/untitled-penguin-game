@@ -59,6 +59,14 @@ class Block(Actor):
             # Logic for breaking
             pass
 
+    def check_for_squish(self):
+        pg.sprite.spritecollide(self, self.game.enemies, True)
+
+    def update(self) -> None:
+        if self.vel != Vector2(0, 0):
+            self.check_for_squish()
+        super().update()
+
 
 class Player(Actor):
     def __init__(self, game: "penguin_game.game.Game", x: int, y: int,) -> None:
