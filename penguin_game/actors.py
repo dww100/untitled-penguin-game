@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import Union, List
 import pygame as pg
 from pygame.math import Vector2
 
