@@ -23,3 +23,6 @@ HEIGHT = GRID_HEIGHT * TILE_SIZE
 
 # Player settings
 PLAYER_SPEED = 0.5
+
+# Block settings
+BLOCK_SPEED = 0.5
