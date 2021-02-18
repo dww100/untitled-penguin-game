@@ -4,7 +4,7 @@ from typing import Union, List
 import pygame as pg
 from pygame.math import Vector2
 
-from .settings import TILE_SIZE, PLAYER_SPEED, BLOCK_SPEED, RED
+from .settings import TILE_SIZE, PLAYER_SPEED, BLOCK_SPEED, RED, BLUE
 from .entities import Actor
 
 
@@ -120,4 +120,4 @@ class Player(Actor):
 
 class Enemy(Actor):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y)
+        super().__init__(game, x, y, additional_groups=game.enemies, colour=BLUE)

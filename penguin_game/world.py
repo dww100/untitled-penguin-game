@@ -2,7 +2,7 @@ from .entities import Thing, Actor
 
 class Block(Actor):
     def __init__(self):
-        super().__init__()
+        super().__init__(,
 
 
 class Fence(Thing):

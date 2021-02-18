@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Union, List
+from typing import Union, List, Tuple
 
 import pygame as pg
 from pygame.sprite import Sprite
@@ -42,6 +42,7 @@ class Actor(Sprite):
         x: int,
         y: int,
         additional_groups: Union[pg.sprite.Group, List[pg.sprite.Group], None] = None,
+        colour: Tuple[int, int, int] = YELLOW,
     ) -> None:
         """Base class for active Sprites that move and interact with their environment.
 
@@ -50,6 +51,7 @@ class Actor(Sprite):
             x: Horizontal starting position in pixels.
             y: Vertical starting position in pixels.
             additional_groups: Sprite groups other than `game.all_sprites` to be associated with.
+            colour: Colour tos use to fill place holder rect.
         """
 
         if additional_groups is None:
@@ -63,7 +65,7 @@ class Actor(Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill(YELLOW)
+        self.image.fill(colour)
         self.rect = self.image.get_rect()
         self.rect.x = x * TILE_SIZE
         self.rect.x = y * TILE_SIZE
@@ -72,7 +74,9 @@ class Actor(Sprite):
 
         self.stopped_by = [self.game.walls]
 
-    def collide_and_stop(self, check_group: pg.sprite.Group, direction: Axis = Axis.X) -> bool:
+    def collide_and_stop(
+        self, check_group: pg.sprite.Group, direction: Axis = Axis.X
+    ) -> bool:
         """Handle collisions with a wall when moving along specified axis.
 
         Args:
