@@ -1,13 +1,20 @@
 from __future__ import annotations
 
+from typing import Union
+
 import pygame as pg
 from pygame.math import Vector2
 
 from .settings import TILE_SIZE, PLAYER_SPEED, BLOCK_SPEED, RED, BLUE
-from .entities import Actor
+from .entities import Actor, Wall
 
 
-def is_actor_neighbour_in_direction(actor1: Actor, actor2: Actor, direction: Vector2, tolerance: float = 10) -> bool:
+def is_actor_neighbour_in_direction(
+    actor1: Union[Actor, Wall],
+    actor2: Union[Actor, Wall],
+    direction: Vector2,
+    tolerance: float = 10,
+) -> bool:
     """Check if actor1 is a direct neighbour of actor2 in direction
 
     Args:
@@ -50,19 +57,27 @@ class Block(Actor):
         hits = pg.sprite.spritecollide(
             self, self.game.blocks, False, pg.sprite.collide_rect_ratio(1.1)
         )
+        hits += pg.sprite.spritecollide(
+            self, self.game.walls, False, pg.sprite.collide_rect_ratio(1.1)
+        )
         blocking = [
             hit for hit in hits if is_actor_neighbour_in_direction(self, hit, direction)
         ]
+
         if not blocking:
             self.vel = BLOCK_SPEED * direction
         else:
-            # Logic for breaking
-            pass
+            self.kill()
 
     def check_for_squish(self):
+        """If Block collides with an enemy the enemy should die.
+        """
         pg.sprite.spritecollide(self, self.game.enemies, True)
 
     def update(self) -> None:
+        """Update state each time round the game loop.
+        Handles movement and collisions. If moving can squish enemies.
+        """
         if self.vel != Vector2(0, 0):
             self.check_for_squish()
         super().update()

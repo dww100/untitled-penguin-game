@@ -30,7 +30,7 @@ class Wall(Sprite):
         self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
         self.image.fill(GREEN)
         self.rect = self.image.get_rect()
-        self.pos = Vector2(x, y)
+        self.pos = Vector2(x, y) * TILE_SIZE
         self.rect.x = x * TILE_SIZE
         self.rect.y = y * TILE_SIZE
 
