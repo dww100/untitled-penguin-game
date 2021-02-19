@@ -48,8 +48,9 @@ class Game:
 
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         self.clock = pg.time.Clock()
-        LOGGER.debug(self.clock.tick(FPS))
-        LOGGER.debug(FPS)
+
+        LOGGER.debug(f"FPS limit: {FPS}\tInitial clock tick (ms): {self.clock.tick(FPS)}")
+
         self.dt = None
 
         self.all_sprites = None
