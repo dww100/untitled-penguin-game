@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 
 from enum import Enum
 from typing import Union, List, Tuple
@@ -8,6 +9,8 @@ from pygame.sprite import Sprite
 from pygame.math import Vector2
 
 from .settings import TILE_SIZE, GREEN, YELLOW
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Axis(Enum):
@@ -72,7 +75,12 @@ class Actor(Sprite):
         self.pos = Vector2(x, y) * TILE_SIZE
         self.vel = Vector2(0, 0)
 
+        self.original_pos = Vector2(x, y) * TILE_SIZE
+        self.original_colour = colour
+
         self.stopped_by = [self.game.walls]
+        self.killed_by = []
+        self.killed = False
 
     def collide_and_stop(
         self, check_group: pg.sprite.Group, direction: Axis = Axis.X
@@ -111,6 +119,21 @@ class Actor(Sprite):
 
             return False
 
+    def check_fatal_collisions(self):
+
+        if not self.killed_by:
+            return False
+
+        for killer in self.killed_by:
+            killed_x = self.collide_and_stop(killer, Axis.X)
+            killed_y = self.collide_and_stop(killer, Axis.Y)
+
+        if killed_x or killed_y:
+            self.vel = Vector2(0, 0)
+            return True
+
+        return False
+
     def update(self) -> None:
         """Update state each time round the game loop.
         Handles movement and wall collisions.
@@ -120,10 +143,11 @@ class Actor(Sprite):
         self.pos += self.vel * self.game.dt
 
         self.rect.x = self.pos.x
-        for stopper in self.stopped_by:
-            self.collide_and_stop(stopper, Axis.X)
-
         self.rect.y = self.pos.y
-        for stopper in self.stopped_by:
-            self.collide_and_stop(stopper, Axis.Y)
 
+        self.killed = self.check_fatal_collisions()
+
+        if not self.killed:
+            for stopper in self.stopped_by:
+                self.collide_and_stop(stopper, Axis.X)
+                self.collide_and_stop(stopper, Axis.Y)

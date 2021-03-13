@@ -180,6 +180,8 @@ class Game:
             self.events()
             self.update()
             self.draw()
+            if self.player.death_timer == 0:
+                self.player.reset()
             if self.player.lives == 0:
                 self.state = State.GAME_OVER
 

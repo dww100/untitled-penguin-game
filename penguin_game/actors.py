@@ -1,12 +1,15 @@
 from __future__ import annotations
+import logging
 
 from typing import Union
 
 import pygame as pg
 from pygame.math import Vector2
 
-from .settings import TILE_SIZE, PLAYER_SPEED, BLOCK_SPEED, RED, BLUE
+from .settings import TILE_SIZE, PLAYER_SPEED, DEATH_TIME, BLOCK_SPEED, RED, BLUE, YELLOW, WHITE
 from .entities import Actor, Wall
+
+LOGGER = logging.getLogger(__name__)
 
 
 def is_actor_neighbour_in_direction(
@@ -94,9 +97,12 @@ class Player(Actor):
         """
         super().__init__(game, x, y, additional_groups=None)
         self.stopped_by.append(game.blocks)
+        self.killed_by.append(game.enemies)
         # Start facing left
         self.facing = Vector2(-1, 0)
         self.lives = 2
+        self.frozen = False
+        self.death_timer = None
 
     def get_keys(self) -> None:
         """Handle keyboard input.
@@ -132,15 +138,37 @@ class Player(Actor):
 
             hits[0].respond_to_push(self.facing)
 
+    def reset(self):
+        self.image.fill(self.original_colour)
+        self.pos = self.original_pos
+        self.death_timer = None
+        self.frozen = False
+
+    def death_update(self):
+        self.death_timer -= 1
+        if self.death_timer % 2:
+            self.image.fill(WHITE)
+        else:
+            self.image.fill(YELLOW)
+
     def update(self) -> None:
         """Update state each time round the game loop.
         Checks for user input, then handles movement and wall collisions.
 
         """
-        if pg.sprite.spritecollide(self, self.game.enemies, False):
-            self.lives -= 1
-        self.get_keys()
+
+        if not self.frozen:
+            self.get_keys()
+
+        if self.death_timer is not None:
+            self.death_update()
+
         super().update()
+
+        if self.killed:
+            self.lives -= 1
+            self.frozen = True
+            self.death_timer = DEATH_TIME
 
 
 class Enemy(Actor):
