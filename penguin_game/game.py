@@ -60,12 +60,14 @@ class Game:
         self.player = None
         self.blocks = None
         self.enemies = None
+        self.score = None
 
         self.state = State.MENU
 
     def setup_play(self):
         """Initialize variables and setup for new game.
         """
+        self.score = 0
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.blocks = pg.sprite.Group()
@@ -75,6 +77,7 @@ class Game:
         Enemy(self, 7, 7)
         self.player = Player(self, 5, 5)
         self.make_boundary_wall()
+
 
     def make_boundary_wall(self) -> None:
         """Create boundary for `Wall` Sprites around game grid.
@@ -228,6 +231,8 @@ class Game:
             life_rect.x = 3 + (INFO_HEIGHT - 2) * i
             life_rect.y = 3
             self.screen.blit(life_icon, life_rect)
+
+        self.draw_text(f"Score: {self.score}", size=24, color=WHITE, x=WIDTH//2, y=6)
 
     def draw(self) -> None:
         """Draw new frame to the screen.
