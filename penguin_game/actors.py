@@ -15,10 +15,6 @@ from .settings import (
     DEATH_TIME,
     BLOCK_SPEED,
     ENEMY_SPEED,
-    RED,
-    BLUE,
-    YELLOW,
-    WHITE,
 )
 from .entities import Actor, Wall
 
