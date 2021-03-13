@@ -225,7 +225,7 @@ class Game:
             life_icon = pg.Surface((icon_size, icon_size))
             life_icon.fill(YELLOW)
             life_rect = life_icon.get_rect()
-            life_rect.x = 3 + (INFO_HEIGHT -2) * i
+            life_rect.x = 3 + (INFO_HEIGHT - 2) * i
             life_rect.y = 3
             self.screen.blit(life_icon, life_rect)
 
