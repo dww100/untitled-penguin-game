@@ -9,6 +9,7 @@ from pygame.math import Vector2
 
 from .settings import (
     TILE_SIZE,
+    INFO_HEIGHT,
     PLAYER_SPEED,
     DEATH_TIME,
     BLOCK_SPEED,
@@ -140,29 +141,29 @@ class Player(Actor):
             ycross = False
             if abs((self.pos.x % TILE_SIZE)-(self.last_pos.x % TILE_SIZE)) > (TILE_SIZE /2):
                 xcross = True
-            if abs(((self.pos.y+32) % TILE_SIZE)-((self.last_pos.y+32) % TILE_SIZE)) > (TILE_SIZE /2):
+            if abs(((self.pos.y+INFO_HEIGHT) % TILE_SIZE)-((self.last_pos.y+INFO_HEIGHT) % TILE_SIZE)) > (TILE_SIZE /2):
                 ycross = True
 
             if xcross or ycross or (self.vel.x == 0 and self.vel.y == 0):
                 # LOGGER.debug(xcross, ycross, self.pos, TILE_SIZE)
                 if keys[pg.K_LEFT]:
-                    self.facing = Vector2(-1,0)
+                    self.facing = Vector2(-1, 0)
                     self.vel = self.facing * PLAYER_SPEED
                 elif keys[pg.K_RIGHT]:
-                    self.facing = Vector2(1,0)
+                    self.facing = Vector2(1, 0)
                     self.vel = self.facing * PLAYER_SPEED
                 elif keys[pg.K_UP]:
-                    self.facing = Vector2(0,-1)
+                    self.facing = Vector2(0, -1)
                     self.vel = self.facing * PLAYER_SPEED
                 elif keys[pg.K_DOWN]:
-                    self.facing = Vector2(0,1)
+                    self.facing = Vector2(0, 1)
                     self.vel = self.facing * PLAYER_SPEED
                 else: 
-                    self.vel = Vector2(0,0)
+                    self.vel = Vector2(0, 0)
                     if xcross:
                         self.pos.x -= self.pos.x % TILE_SIZE
                     if ycross:
-                        self.pos.y -= (self.pos.y+32) % TILE_SIZE
+                        self.pos.y -= (self.pos.y+INFO_HEIGHT) % TILE_SIZE
            
         else:
             self.vel = Vector2(0, 0)
