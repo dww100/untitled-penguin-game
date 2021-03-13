@@ -8,7 +8,7 @@ import pygame as pg
 from pygame.sprite import Sprite
 from pygame.math import Vector2
 
-from .settings import TILE_SIZE, GREEN, YELLOW
+from .settings import TILE_SIZE, GREEN, YELLOW, INFO_HEIGHT
 
 LOGGER = logging.getLogger(__name__)
 
@@ -34,8 +34,10 @@ class Wall(Sprite):
         self.image.fill(GREEN)
         self.rect = self.image.get_rect()
         self.pos = Vector2(x, y) * TILE_SIZE
+        self.pos.y += INFO_HEIGHT
         self.rect.x = x * TILE_SIZE
         self.rect.y = y * TILE_SIZE
+        self.rect.y += INFO_HEIGHT
 
 
 class Actor(Sprite):
@@ -71,11 +73,13 @@ class Actor(Sprite):
         self.image.fill(colour)
         self.rect = self.image.get_rect()
         self.rect.x = x * TILE_SIZE
-        self.rect.x = y * TILE_SIZE
+        self.rect.y = y * TILE_SIZE
+        self.rect.y += INFO_HEIGHT
         self.pos = Vector2(x, y) * TILE_SIZE
+        self.pos.y += INFO_HEIGHT
         self.vel = Vector2(0, 0)
 
-        self.original_pos = Vector2(x, y) * TILE_SIZE
+        self.original_pos = self.pos
         self.original_colour = colour
 
         self.stopped_by = [self.game.walls]

@@ -10,6 +10,7 @@ from .settings import (
     WIDTH,
     GRID_HEIGHT,
     GRID_WIDTH,
+    INFO_HEIGHT,
     FPS,
     TILE_SIZE,
     BG_COLOR,
@@ -46,7 +47,7 @@ class Game:
 
         pg.init()
 
-        self.screen = pg.display.set_mode((WIDTH, HEIGHT))
+        self.screen = pg.display.set_mode((WIDTH, INFO_HEIGHT + HEIGHT))
         self.clock = pg.time.Clock()
 
         LOGGER.debug(f"FPS limit: {FPS}\tInitial clock tick (ms): {self.clock.tick(FPS)}")
@@ -188,7 +189,6 @@ class Game:
                 else:
                     self.player.reset()
 
-
     def events(self) -> None:
         """Handle events - key presses etc.
         """
@@ -210,14 +210,20 @@ class Game:
         Note: for testing only.
         """
         for x in range(0, WIDTH, TILE_SIZE):
-            pg.draw.line(self.screen, LIGHT_GREY, (x, 0), (x, HEIGHT))
-        for y in range(0, HEIGHT, TILE_SIZE):
+            pg.draw.line(self.screen, LIGHT_GREY, (x, INFO_HEIGHT), (x, HEIGHT))
+        for y in range(INFO_HEIGHT, INFO_HEIGHT + HEIGHT, TILE_SIZE):
             pg.draw.line(self.screen, LIGHT_GREY, (0, y), (WIDTH, y))
+
+    def draw_info(self) -> None:
+        """Draw info line - lives and score
+        """
+        pass
 
     def draw(self) -> None:
         """Draw new frame to the screen.
         """
         self.screen.fill(BG_COLOR)
         self.draw_grid()
+        self.draw_info()
         self.all_sprites.draw(self.screen)
         pg.display.flip()
