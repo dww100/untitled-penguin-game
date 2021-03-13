@@ -64,6 +64,9 @@ class Game:
 
         self.state = State.MENU
 
+        self.sounds = {}
+        self.sounds['swoosh'] = pg.mixer.Sound('sounds/swoosh.wav')
+
     def setup_play(self):
         """Initialize variables and setup for new game.
         """
