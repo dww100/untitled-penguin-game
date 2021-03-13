@@ -177,13 +177,17 @@ class Game:
         while self.state == State.PLAY:
             # Using clock.tick each loop ensures framerate is limited to target FPS
             self.dt = self.clock.tick(FPS)
+
             self.events()
             self.update()
             self.draw()
+
             if self.player.death_timer == 0:
-                self.player.reset()
-            if self.player.lives == 0:
-                self.state = State.GAME_OVER
+                if self.player.lives == 0:
+                    self.state = State.GAME_OVER
+                else:
+                    self.player.reset()
+
 
     def events(self) -> None:
         """Handle events - key presses etc.
