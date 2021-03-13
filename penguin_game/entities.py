@@ -79,7 +79,7 @@ class Actor(Sprite):
         self.pos.y += INFO_HEIGHT
         self.vel = Vector2(0, 0)
 
-        self.original_pos = self.pos
+        self.original_pos = Vector2(self.pos)
         self.original_colour = colour
 
         self.stopped_by = [self.game.walls]
