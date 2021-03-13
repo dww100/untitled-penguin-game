@@ -16,6 +16,7 @@ from .settings import (
     DEATH_TIME,
     BLOCK_SPEED,
     ENEMY_SPEED,
+    ENEMY_IQ,
     RED,
     BLUE,
     YELLOW,
@@ -359,21 +360,47 @@ class Enemy(Actor):
         self.stopped_by.append(game.blocks)
         self.killed_by.append(game.moving_blocks)
         self.vel = self.facing * ENEMY_SPEED
+        self.hunt = False
+
+    def choose_new_direction(self, init_facing):
+        turn_options = [self.facing * -1]
+        if self.facing.x == 0:
+            turn_options += [Vector2(1,0), Vector2(-1,0)]
+        else:
+            turn_options += [Vector2(0,1), Vector2(0,-1)]
+        random_turn = turn_options[np.random.randint(3)]
+
+        # find direction to player
+        x = self.pos.x - self.game.player.pos.x
+        y = self.pos.y - self.game.player.pos.y
+        if abs(x) > abs(y):
+            if x > 0:
+                chase = Vector2(-1,0)
+            else:
+                chase = Vector2(1,0)
+        else:
+            if y > 0:
+                chase = Vector2(0,-1)
+            else:
+                chase = Vector2(0,1)
+
+        if chase == init_facing:
+            # Too dumb to know how to chase, TODO add path finding here
+            return random_turn
+
+        if np.random.random() < ENEMY_IQ or self.hunt:
+            return chase
+        else:
+            return random_turn
 
     def update(self) -> None:
 
-        init_vel = Vector2(self.vel)
+        init_facing = self.facing
 
         super().update()
 
         if not self.vel.magnitude(): # has collided with something
-            turn_options = [self.facing * -1]
-            if self.facing.x == 0:
-                turn_options += [Vector2(1,0), Vector2(-1,0)]
-            else:
-                turn_options += [Vector2(0,1), Vector2(0,-1)]
-
-            self.facing = turn_options[np.random.randint(3)]
+            self.facing = self.choose_new_direction(init_facing)
             self.vel = self.facing * ENEMY_SPEED
 
             self.update_animation(direction_change=True)
