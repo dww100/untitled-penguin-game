@@ -253,10 +253,11 @@ class Player(Actor):
         hits = pg.sprite.spritecollide(
             self, self.game.blocks, False, pg.sprite.collide_circle_ratio(0.75)
         )
+        hits = [h for h in hits if is_actor_neighbour_in_direction(
+            self, h, self.facing
+        )]
 
-        if len(hits) == 1 and is_actor_neighbour_in_direction(
-            self, hits[0], self.facing
-        ):
+        if hits:
 
             hits[0].respond_to_push(self.facing)
             self.game.blocks.remove(hits)
@@ -266,9 +267,9 @@ class Player(Actor):
             self, self.game.walls, False, pg.sprite.collide_circle_ratio(0.75)
         )
 
-        if len(hits) > 0 and is_actor_neighbour_in_direction(
-            self, hits[0], self.facing
-        ):
+        if [h for h in hits if is_actor_neighbour_in_direction(
+            self, h, self.facing
+        )]:
             play_sound(self.game.sounds["electric"])
 
     def reset(self):
