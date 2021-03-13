@@ -179,6 +179,12 @@ class Player(Actor):
         self.death_timer = None
         self.snap_to_grid = False
 
+        self.death_images = []
+        for frame_no in range(1, 4):
+            self.death_images.append(pg.image.load(
+                    path.join(image_dir, f"pengo_dead{frame_no}.png")
+                ).convert_alpha())
+
     def get_keys(self) -> None:
         """Handle keyboard input.
         """
@@ -266,6 +272,7 @@ class Player(Actor):
             play_sound(self.game.sounds["electric"])
 
     def reset(self):
+        self.image = self.move_down_images[0]
         self.facing = Vector2(0, 1)
         self.pos = self.original_pos
         self.death_timer = None
@@ -276,11 +283,10 @@ class Player(Actor):
         """
         self.death_timer -= 1
 
+        gap = DEATH_TIME // 3
         # TODO: Replace with a good animation
-        if self.death_timer % 2:
-            self.image.fill(WHITE)
-        else:
-            self.image.fill(YELLOW)
+        frame = int(self.death_timer / gap) - 1
+        self.image = self.death_images[frame]
 
     def update(self) -> None:
         """Update state each time round the game loop.

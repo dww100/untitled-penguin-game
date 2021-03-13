@@ -26,7 +26,7 @@ INFO_HEIGHT = 32
 
 # Player settings
 PLAYER_SPEED = 0.5
-DEATH_TIME = 25
+DEATH_TIME = 30
 
 # Block settings
 BLOCK_SPEED = 0.5
