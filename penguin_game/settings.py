@@ -30,3 +30,6 @@ DEATH_TIME = 25
 
 # Block settings
 BLOCK_SPEED = 0.5
+
+# Enemy settings
+ENEMY_SPEED = 0.3

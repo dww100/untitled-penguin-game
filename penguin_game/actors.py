@@ -6,7 +6,17 @@ from typing import Union
 import pygame as pg
 from pygame.math import Vector2
 
-from .settings import TILE_SIZE, PLAYER_SPEED, DEATH_TIME, BLOCK_SPEED, RED, BLUE, YELLOW, WHITE
+from .settings import (
+    TILE_SIZE,
+    PLAYER_SPEED,
+    DEATH_TIME,
+    BLOCK_SPEED,
+    ENEMY_SPEED,
+    RED,
+    BLUE,
+    YELLOW,
+    WHITE,
+)
 from .entities import Actor, Wall
 
 LOGGER = logging.getLogger(__name__)
@@ -180,6 +190,23 @@ class Player(Actor):
 
 
 class Enemy(Actor):
-    def __init__(self, game, x, y):
+    def __init__(
+        self, game, x, y, initial_direction: "pygame.math.Vector2" = Vector2(0, 1)
+    ):
+
         super().__init__(game, x, y, additional_groups=game.enemies, colour=BLUE)
+        self.stopped_by.append(game.blocks)
+        self.facing = initial_direction
+        self.vel = self.facing * ENEMY_SPEED
+        self.blockedX = False
+        self.blockedY = False
+
+    def update(self) -> None:
+        init_velx = self.vel.x
+        init_vely = self.vel.y
+
+        if self.blockedX:
+            self.vel.x = init_velx * -1
+        if self.blockedY:
+            self.vel.y = init_vely * -1
 
