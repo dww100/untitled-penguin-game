@@ -130,6 +130,7 @@ class Game:
         self.screen.fill(BG_COLOR)
         self.draw_text(TITLE, 48, WHITE, WIDTH / 2, HEIGHT / 4)
         self.draw_text("Arrows to move", 22, WHITE, WIDTH / 2, HEIGHT / 2)
+        self.draw_text("Space to push blocks", 22, WHITE, WIDTH / 2, HEIGHT / 2 + 30)
         self.draw_text("Press a key to play", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
         self.draw_text("Esc to Quit", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4 + 30)
         pg.display.flip()
