@@ -70,6 +70,8 @@ class Game:
         self.sounds['death_self'].set_volume(0.2)
         self.sounds['death_enemy'] = pg.mixer.Sound('sounds/chords.wav')
         self.sounds['death_enemy'].set_volume(0.2)
+        self.sounds['electric'] = pg.mixer.Sound('sounds/electric.wav')
+        self.sounds['electric'].set_volume(0.2)
 
     def setup_play(self):
         """Initialize variables and setup for new game.
