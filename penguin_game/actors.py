@@ -85,6 +85,8 @@ class Block(Actor):
             move_right_images=static_images,
         )
 
+        self.stopped_by.append(game.blocks)
+
     def respond_to_push(self, direction: Vector2):
         """Respond to a push by moving in a direction if free to do so or breaking.
 
