@@ -167,6 +167,7 @@ class Player(Actor):
         super().update()
 
         if self.killed:
+            self.game.sounds['death_self'].play()
             self.lives -= 1
             self.frozen = True
             self.death_timer = DEATH_TIME
