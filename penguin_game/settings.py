@@ -16,11 +16,9 @@ FPS = 60
 
 TILE_SIZE = 64
 # Dimensions of the game space in tiles
-GRID_WIDTH = 12
-GRID_HEIGHT = 12
-# Dimensions of the game space in pixels
-WIDTH = GRID_WIDTH * TILE_SIZE
-HEIGHT = GRID_HEIGHT * TILE_SIZE
+MAX_GRID_WIDTH = 12
+MAX_GRID_HEIGHT = 12
+
 # Height of info bar
 INFO_HEIGHT = 32
 
