@@ -108,6 +108,8 @@ class Actor(Sprite):
                 self.vel.x = 0
                 self.rect.x = self.pos.x
 
+                self.blockedX = True
+
             else:
                 # Y axis: +ve = down, -ve = up
                 if self.vel.y > 0:
@@ -116,6 +118,8 @@ class Actor(Sprite):
                     self.pos.y = hits[0].rect.bottom
                 self.vel.y = 0
                 self.rect.y = self.pos.y
+
+                self.blockedY = True
 
             return True
 
@@ -142,6 +146,8 @@ class Actor(Sprite):
         """Update state each time round the game loop.
         Handles movement and wall collisions.
         """
+        self.blockedX = False
+        self.blockedY = False
 
         # Scale movement to ensure reliable frame rate.
         self.pos += self.vel * self.game.dt

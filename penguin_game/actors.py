@@ -188,8 +188,17 @@ class Enemy(Actor):
 
         super().__init__(game, x, y, additional_groups=game.enemies, colour=BLUE)
         self.stopped_by.append(game.blocks)
-        self.vel = initial_direction * ENEMY_SPEED
+        self.facing = initial_direction
+        self.vel = self.facing * ENEMY_SPEED
+        self.blockedX = False
+        self.blockedY = False
 
     def update(self) -> None:
-        super().update()
+        init_velx = self.vel.x
+        init_vely = self.vel.y
+
+        if self.blockedX:
+            self.vel.x = init_velx * -1
+        if self.blockedY:
+            self.vel.y = init_vely * -1
 
