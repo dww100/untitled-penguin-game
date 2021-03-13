@@ -18,9 +18,12 @@ class Level(object):
 
     def load_sprites(self, game):
         def init_sprite(i, j, char):
-            if ELEMENTS[char]:
-                print(char, ELEMENTS[char])
-                ELEMENTS[char](game, j, i)
+            obj = ELEMENTS[char]
+            if obj:
+                if obj is Player:
+                    game.player = obj(game, j, i)
+                else:
+                    obj(game, j, i)
 
         with open(self.fname, 'r') as f:
             for i, line in enumerate(f):
