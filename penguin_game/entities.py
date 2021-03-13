@@ -39,6 +39,9 @@ class Wall(Sprite):
         self.rect.y = y * TILE_SIZE
         self.rect.y += INFO_HEIGHT
 
+    def respond_to_push(self, direction):
+        play_sound(self.game.sounds['electric'])
+
 
 class Actor(Sprite):
     def __init__(
