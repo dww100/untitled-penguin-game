@@ -31,7 +31,7 @@ def is_actor_neighbour_in_direction(
     actor1: Union[Actor, Wall],
     actor2: Union[Actor, Wall],
     direction: Vector2,
-    tolerance: float = 10,
+    tolerance: float = 12,
 ) -> bool:
     """Check if actor1 is a direct neighbour of actor2 in direction
 
@@ -251,7 +251,7 @@ class Player(Actor):
         """
 
         hits = pg.sprite.spritecollide(
-            self, self.game.blocks, False, pg.sprite.collide_circle_ratio(0.75)
+            self, self.game.blocks, False, pg.sprite.collide_circle_ratio(1.2)
         )
         hits = [h for h in hits if is_actor_neighbour_in_direction(
             self, h, self.facing
