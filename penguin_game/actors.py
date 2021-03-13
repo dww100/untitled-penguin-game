@@ -17,6 +17,7 @@ from .settings import (
     BLOCK_SPEED,
     ENEMY_SPEED,
     ENEMY_IQ,
+    ENEMY_KILL_POINTS,
     RED,
     BLUE,
     YELLOW,
@@ -90,7 +91,7 @@ class Block(Actor):
             move_right_images=static_images,
         )
 
-        self.stopped_by.append(self.game.blocks)
+        self.stopped_by.append(game.blocks)
 
     def respond_to_push(self, direction: Vector2):
         """Respond to a push by moving in a direction if free to do so or breaking.
@@ -188,9 +189,6 @@ class Player(Actor):
             self.death_images.append(pg.image.load(
                     path.join(image_dir, f"pengo_dead{frame_no}.png")
                 ).convert_alpha())
-
-        LOGGER.debug(f"Player position: {self.pos}")
-        LOGGER.debug(f"Player rect position: {self.rect.x}, {self.rect.y}")
 
     def get_keys(self) -> None:
         """Handle keyboard input.
@@ -301,15 +299,11 @@ class Player(Actor):
         Checks for user input, then handles movement and wall collisions.
         """
 
-        direction_change = False
+        change_direction = False
 
         # Player could be frozen on death or a restart - ignore user input
         if not self.frozen:
-            initial_direction = Vector2(self.facing)
-            initial_vel = Vector2(self.vel)
             self.get_keys()
-            if self.facing != initial_direction or initial_vel != initial_vel:
-                direction_change = True
 
         super().update()
 
@@ -324,7 +318,7 @@ class Player(Actor):
             self.frozen = True
             self.death_timer = DEATH_TIME
         else:
-            self.update_animation(direction_change=direction_change)
+            self.update_animation(direction_change=change_direction)
 
 
 class Enemy(Actor):
@@ -410,4 +404,5 @@ class Enemy(Actor):
 
         if self.killed:
             play_sound(self.game.sounds["death_enemy"])
+            self.game.score += ENEMY_KILL_POINTS
             self.kill()
