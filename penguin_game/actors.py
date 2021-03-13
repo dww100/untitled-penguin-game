@@ -248,13 +248,8 @@ class Player(Actor):
         super().update()
 
         # self.killed set during super.update()
-<<<<<<< HEAD
         if self.killed and self.death_timer is None:
-            self.game.sounds['death_self'].play()
-=======
-        if self.killed:
             play_sound(self.game.sounds['death_self'])
->>>>>>> 41a2131 (better playback)
             self.lives -= 1
             self.frozen = True
             self.death_timer = DEATH_TIME
