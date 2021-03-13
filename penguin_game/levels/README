@@ -1,4 +1,4 @@
- : (space) Air space
+. : (space) Air space
 0: Block
 1: Player start
 2: Enemy
