@@ -4,6 +4,7 @@ import logging
 from os import path
 from typing import Union
 from .utils import play_sound
+import numpy as np
 
 import pygame as pg
 from pygame.math import Vector2
@@ -365,10 +366,15 @@ class Enemy(Actor):
 
         super().update()
 
-        if not self.vel.magnitude():
+        if not self.vel.magnitude(): # has collided with something
+            turn_options = [self.facing * -1]
+            if self.facing.x == 0:
+                turn_options += [Vector2(1,0), Vector2(-1,0)]
+            else:
+                turn_options += [Vector2(0,1), Vector2(0,-1)]
 
-            self.vel = init_vel * -1
-            self.facing = self.facing * -1
+            self.facing = turn_options[np.random.randint(3)]
+            self.vel = self.facing * ENEMY_SPEED
 
             self.update_animation(direction_change=True)
 
