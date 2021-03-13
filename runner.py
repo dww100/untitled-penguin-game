@@ -7,7 +7,8 @@ logging.basicConfig(level=logging.DEBUG)
 if __name__ == "__main__":
     pygame.mixer.init()
     pygame.mixer.music.load('sounds/theme.wav')
-    pygame.mixer.music.play()
+    pygame.mixer.music.set_volume(0.1)
+    pygame.mixer.music.play(-1, fade_ms=1000)
 
     g = Game()
     g.run()
