@@ -6,11 +6,10 @@ from typing import Optional, Tuple
 
 import pygame as pg
 
+from .level import Level
 from .settings import (
     HEIGHT,
     WIDTH,
-    GRID_HEIGHT,
-    GRID_WIDTH,
     INFO_HEIGHT,
     FPS,
     TILE_SIZE,
@@ -87,23 +86,25 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.blocks = pg.sprite.Group()
-        Block(self, 5, 6)
-        Block(self, 5, 7)
         self.moving_blocks = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
-        Enemy(self, 7, 7)
-        self.player = Player(self, 5, 5)
-        self.make_boundary_wall()
 
-    def make_boundary_wall(self) -> None:
+        level = Level('penguin_game/levels/1.txt')
+        level.load_sprites(self)
+
+        print(len(self.enemies), len(self.blocks))
+
+        self.make_boundary_wall(level.height, level.width)
+
+    def make_boundary_wall(self, height, width) -> None:
         """Create boundary for `Wall` Sprites around game grid.
         """
-        for x in range(0, GRID_WIDTH):
+        for x in range(0, width):
             Wall(self, x, 0)
-            Wall(self, x, GRID_HEIGHT - 1)
-        for y in range(1, GRID_HEIGHT - 1):
+            Wall(self, x, height - 1)
+        for y in range(1, height - 1):
             Wall(self, 0, y)
-            Wall(self, GRID_WIDTH - 1, y)
+            Wall(self, width - 1, y)
 
     @staticmethod
     def quit() -> None:

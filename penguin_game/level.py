@@ -1,16 +1,31 @@
-from settings import MAX_GRID_HEIGHT, MAX_GRID_WIDTH
+from .settings import MAX_GRID_HEIGHT, MAX_GRID_WIDTH
+from .actors import Player, Block, Enemy
 
-VALID_ELEMENTS = [' ', '0', '1', '2', '\n'] 
+ELEMENTS = {
+        ' ': None,
+        '0': Block,
+        '1': Player,
+        '2': Enemy,
+        '\n': None
+}
 
 
 class Level(object):
 
     def __init__(self, fname):
-        self.read_in_level_data(fname)
+        self.fname = fname
+        self.height, self.width = self.validate_input(self.fname)
 
-    def read_in_level_data(self, fname):
-        height, width = self.validate_input(fname)
-        print(height, width)
+    def load_sprites(self, game):
+        def init_sprite(i, j, char):
+            if ELEMENTS[char]:
+                print(char, ELEMENTS[char])
+                ELEMENTS[char](game, j, i)
+
+        with open(self.fname, 'r') as f:
+            for i, line in enumerate(f):
+                for j, char in enumerate(line):
+                    init_sprite(i, j, char)
 
     def validate_input(self, fname):
         n_lines = 0
@@ -23,8 +38,8 @@ class Level(object):
                 n_lines += 1
 
                 for c in line:
-                    assert c in VALID_ELEMENTS, f"Level file: unrecognised token '{c}',\
-                                                  must be one of {VALID_ELEMENTS}"
+                    assert c in ELEMENTS.keys(), f"Level file: unrecognised token '{c}',\
+                                                  must be one of {ELEMENTS}"
 
         n_cols -= 1 # ignore new line char
         assert n_lines < MAX_GRID_HEIGHT
