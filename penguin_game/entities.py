@@ -8,8 +8,6 @@ import pygame as pg
 from pygame.sprite import Sprite
 from pygame.math import Vector2
 
-from .utils import play_sound
-
 from .settings import TILE_SIZE, GREEN, YELLOW, INFO_HEIGHT
 
 LOGGER = logging.getLogger(__name__)
@@ -193,10 +191,10 @@ class Actor(Sprite):
             else:
                 images = self.move_left_images
 
-            if direction_change:
+            if self.image not in images:
                 self.animation_frame = 0
                 self.last_update = 0
-            elif self.last_update > self.update_freq:
+            elif self.last_update % self.update_freq:
                 self.animation_frame = (self.animation_frame + 1) % len(images)
                 self.last_update = 0
             else:

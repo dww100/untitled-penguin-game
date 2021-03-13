@@ -303,11 +303,7 @@ class Player(Actor):
 
         # Player could be frozen on death or a restart - ignore user input
         if not self.frozen:
-            initial_direction = Vector2(self.facing)
-            initial_vel = Vector2(self.vel)
             self.get_keys()
-            if self.facing != initial_direction or initial_vel != initial_vel:
-                direction_change = True
 
         super().update()
 
