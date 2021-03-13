@@ -92,7 +92,7 @@ class Game:
         level = Level('penguin_game/levels/1.txt')
         level.load_sprites(self)
 
-        print(len(self.enemies), len(self.blocks))
+        LOGGER.debug(f"No. enemies: {len(self.enemies)}, No. blocks: {len(self.blocks)}")
 
         self.make_boundary_wall(level.height, level.width)
 
