@@ -85,5 +85,7 @@ class Level(object):
 
 
 if __name__ == "__main__":
-    Level('levels/1.txt')
+    test_level = Level('levels/1.txt')
+    test_level.load_level()
+    print(test_level.element_grid)
 
