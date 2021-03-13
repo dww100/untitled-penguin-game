@@ -47,6 +47,11 @@ class Actor(Sprite):
         x: int,
         y: int,
         additional_groups: Union[pg.sprite.Group, List[pg.sprite.Group], None] = None,
+        no_movement_images: List[pg.Surface] = None,
+        move_up_images: List[pg.Surface] = None,
+        move_down_images: List[pg.Surface] = None,
+        move_left_images: List[pg.Surface] = None,
+        move_right_images: List[pg.Surface] = None,
         colour: Tuple[int, int, int] = YELLOW,
     ) -> None:
         """Base class for active Sprites that move and interact with their environment.
@@ -69,8 +74,15 @@ class Actor(Sprite):
 
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill(colour)
+
+        if no_movement_images is not None:
+            self.no_movement_images = no_movement_images
+            self.image = self.no_movement_images[0]
+        else:
+            self.no_movement_images = [pg.Surface((TILE_SIZE, TILE_SIZE))]
+            self.image = self.no_movement_images[0]
+            self.image.fill(colour)
+
         self.rect = self.image.get_rect()
         self.rect.x = x * TILE_SIZE
         self.rect.y = y * TILE_SIZE

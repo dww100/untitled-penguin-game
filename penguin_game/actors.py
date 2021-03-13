@@ -1,6 +1,7 @@
 from __future__ import annotations
 import logging
 
+from os import path
 from typing import Union
 
 import pygame as pg
@@ -18,6 +19,8 @@ from .settings import (
     WHITE,
 )
 from .entities import Actor, Wall
+
+image_dir = path.join(path.dirname(__file__), "images")
 
 LOGGER = logging.getLogger(__name__)
 
@@ -49,16 +52,22 @@ def is_actor_neighbour_in_direction(
 
 
 class Block(Actor):
-    def __init__(self, game: "penguin_game.game.Game", x: int, y: int,) -> None:
+    def __init__(self, game: "penguin_game.game.Game", x: int, y: int, diamond=False) -> None:
         """Block Sprite.
 
         Args:
             game: Game that this Sprite is associated with (provides access to timing, etc).
             x: Horizontal starting position in pixels.
             y: Vertical starting position in pixels.
+            diamond: Is this a diamond?
         """
-        super().__init__(game, x, y, additional_groups=game.blocks)
-        self.image.fill(RED)
+
+        if diamond:
+            static_images = [pg.image.load(path.join(image_dir, 'block_yellow64x64.png')).convert()]
+        else:
+            static_images = [pg.image.load(path.join(image_dir, 'block64x64.png')).convert()]
+
+        super().__init__(game, x, y, additional_groups=game.blocks, no_movement_images=static_images)
 
     def respond_to_push(self, direction: Vector2):
         """Respond to a push by moving in a direction if free to do so or breaking.
@@ -204,6 +213,8 @@ class Enemy(Actor):
     def update(self) -> None:
         init_velx = self.vel.x
         init_vely = self.vel.y
+
+        super().update()
 
         if self.blockedX:
             self.vel.x = init_velx * -1
