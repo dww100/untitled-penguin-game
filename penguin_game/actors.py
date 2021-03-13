@@ -56,6 +56,7 @@ class Block(Actor):
         Args:
             direction: direction of attempted push - determines movement direction.
         """
+        self.game.sounds['swoosh'].play()
 
         hits = pg.sprite.spritecollide(
             self, self.game.blocks, False, pg.sprite.collide_rect_ratio(1.1)
