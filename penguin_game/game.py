@@ -77,7 +77,7 @@ class Game:
         }
 
         self.sounds['death_self'].set_volume(0.2)
-        self.sounds['death_enemy'].set_volume(0.2)
+        self.sounds['death_enemy'].set_volume(0.6)
         self.sounds['electric'].set_volume(0.2)
 
     def setup_play(self):
