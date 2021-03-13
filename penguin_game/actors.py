@@ -132,7 +132,7 @@ class Player(Actor):
         self.lives = 2
         self.frozen = False
         self.death_timer = None
-        self.snap_to_grid = True
+        self.snap_to_grid = False
 
     def get_keys(self) -> None:
         """Handle keyboard input.
