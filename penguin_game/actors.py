@@ -66,6 +66,13 @@ class Block(Actor):
         Args:
             direction: direction of attempted push - determines movement direction.
         """
+        self.game.blocks.remove([self])
+        self.game.moving_blocks.add(self)
+        print('resp')
+        print(self.game.moving_blocks.has())
+        print(self.game.blocks.has())
+        print()
+
         self.game.sounds['swoosh'].play()
 
         hits = pg.sprite.spritecollide(
@@ -148,6 +155,10 @@ class Player(Actor):
         ):
 
             hits[0].respond_to_push(self.facing)
+            print(hits)
+            self.game.moving_blocks.add(hits)
+            print(hits)
+            print(self.game.moving_blocks.has())
 
     def reset(self):
         self.image.fill(self.original_colour)
@@ -191,24 +202,31 @@ class Player(Actor):
 
 class Enemy(Actor):
     def __init__(
-        self, game, x, y, initial_direction: "pygame.math.Vector2" = Vector2(0, 1)
+        self, game, x, y, initial_direction: "pygame.math.Vector2" = Vector2(1, 0)
     ):
 
         super().__init__(game, x, y, additional_groups=game.enemies, colour=BLUE)
         self.stopped_by.append(game.blocks)
+        self.killed_by.append(game.moving_blocks)
         self.facing = initial_direction
         self.vel = self.facing * ENEMY_SPEED
-        self.blockedX = False
-        self.blockedY = False
 
     def update(self) -> None:
         init_velx = self.vel.x
         init_vely = self.vel.y
+    
+
+        #hits = pg.sprite.spritecollide(self, self.game.blocks, False)
+        #print(hits)
+        #for hit in hits:
+        #    print('hit block', hit.vel.magnitude())
+        #    if hit.vel.magnitude():
+        #        self.kill()
 
         super().update()
 
-        if self.blockedX:
+        if not self.vel.magnitude():
+
             self.vel.x = init_velx * -1
-        if self.blockedY:
             self.vel.y = init_vely * -1
 

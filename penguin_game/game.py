@@ -59,6 +59,7 @@ class Game:
         self.walls = None
         self.player = None
         self.blocks = None
+        self.moving_blocks = None
         self.enemies = None
         self.score = None
 
@@ -80,6 +81,7 @@ class Game:
         self.blocks = pg.sprite.Group()
         Block(self, 5, 6)
         Block(self, 5, 7)
+        self.moving_blocks = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
         Enemy(self, 7, 7)
         self.player = Player(self, 5, 5)
