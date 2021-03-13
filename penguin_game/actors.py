@@ -92,7 +92,7 @@ class Block(Actor):
             direction: direction of attempted push - determines movement direction.
         """
 
-        self.game.sounds['swoosh'].play()
+        play_sound(self.game.sounds['swoosh'])
 
         hits = pg.sprite.spritecollide(
             self, self.game.blocks, False, pg.sprite.collide_rect_ratio(1.1)
@@ -324,6 +324,5 @@ class Enemy(Actor):
             self.update_animation()
 
         if self.killed:
-            self.game.sounds["death_enemy"].play()
             play_sound(self.game.sounds['death_enemy'])
             self.kill()
