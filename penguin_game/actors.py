@@ -78,7 +78,10 @@ class Block(Actor):
             ]
 
         super().__init__(
-            game, x, y, additional_groups=game.blocks,
+            game,
+            x,
+            y,
+            additional_groups=game.blocks,
             move_up_images=static_images,
             move_down_images=static_images,
             move_left_images=static_images,
@@ -92,7 +95,7 @@ class Block(Actor):
             direction: direction of attempted push - determines movement direction.
         """
 
-        play_sound(self.game.sounds['swoosh'])
+        play_sound(self.game.sounds["swoosh"])
 
         hits = pg.sprite.spritecollide(
             self, self.game.blocks, False, pg.sprite.collide_rect_ratio(1.1)
@@ -138,7 +141,35 @@ class Player(Actor):
             x: Horizontal starting position in pixels.
             y: Vertical starting position in pixels.
         """
-        super().__init__(game, x, y, initial_direction=Vector2(0, 1), additional_groups=None, colour=YELLOW)
+
+        move_up_images = []
+        for frame_no in range(1, 3):
+            move_up_images.append(pg.image.load(
+                    path.join(image_dir, f"pengo_back{frame_no}.png")
+                ).convert_alpha())
+        move_down_images = []
+        for frame_no in range(1, 3):
+            move_down_images.append(pg.image.load(
+                    path.join(image_dir, f"pengo_front{frame_no}.png")
+                ).convert_alpha())
+        move_left_images = [pg.image.load(
+                    path.join(image_dir, f"pengo_left.png")
+                ).convert_alpha()]
+        move_right_images = [pg.image.load(
+                    path.join(image_dir, f"pengo_right.png")
+                ).convert_alpha()]
+
+        super().__init__(
+            game,
+            x,
+            y,
+            initial_direction=Vector2(0, 1),
+            additional_groups=None,
+            move_up_images=move_up_images,
+            move_down_images=move_down_images,
+            move_left_images=move_left_images,
+            move_right_images=move_right_images,
+        )
         self.stopped_by.append(game.blocks)
         self.killed_by.append(game.enemies)
         self.vel = Vector2(0, 0)
@@ -151,6 +182,7 @@ class Player(Actor):
     def get_keys(self) -> None:
         """Handle keyboard input.
         """
+
         keys = pg.key.get_pressed()
 
         if self.snap_to_grid:
@@ -231,7 +263,7 @@ class Player(Actor):
         if len(hits) == 1 and is_actor_neighbour_in_direction(
             self, hits[0], self.facing
         ):
-            play_sound(self.game.sounds['electric'])
+            play_sound(self.game.sounds["electric"])
 
     def reset(self):
         self.image.fill(self.original_colour)
@@ -255,22 +287,29 @@ class Player(Actor):
         Checks for user input, then handles movement and wall collisions.
         """
 
+        change_direction = False
+
         # Player could be frozen on death or a restart - ignore user input
         if not self.frozen:
+            initial_direction = Vector2(self.facing)
             self.get_keys()
+            if self.facing != initial_direction:
+                change_direction = True
+
+        super().update()
 
         # Enact post death animation while timer is set
         if self.death_timer is not None:
             self.death_update()
 
-        super().update()
-
         # self.killed set during super.update()
-        if self.killed and self.death_timer is None:
-            play_sound(self.game.sounds['death_self'])
+        elif self.killed:
+            play_sound(self.game.sounds["death_self"])
             self.lives -= 1
             self.frozen = True
             self.death_timer = DEATH_TIME
+        else:
+            self.update_animation(direction_change=change_direction)
 
 
 class Enemy(Actor):
@@ -324,5 +363,5 @@ class Enemy(Actor):
             self.update_animation()
 
         if self.killed:
-            play_sound(self.game.sounds['death_enemy'])
+            play_sound(self.game.sounds["death_enemy"])
             self.kill()

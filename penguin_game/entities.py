@@ -78,6 +78,8 @@ class Actor(Sprite):
         self.facing = initial_direction
 
         self.animation_frame = 0
+        self.last_update = 0
+        self.update_freq = 5
 
         if colour is not None:
             images = [pg.Surface((TILE_SIZE, TILE_SIZE))]
@@ -176,21 +178,26 @@ class Actor(Sprite):
 
     def update_animation(self, direction_change=False):
 
-        if self.facing == Vector2(0, 1):
-            images = self.move_down_images
-        elif self.facing == Vector2(0, -1):
-            images = self.move_up_images
-        elif self.facing == Vector2(1, 0):
-            images = self.move_right_images
-        else:
-            images = self.move_left_images
+        if self.vel != Vector2(0, 0):
+            if self.facing == Vector2(0, 1):
+                images = self.move_down_images
+            elif self.facing == Vector2(0, -1):
+                images = self.move_up_images
+            elif self.facing == Vector2(1, 0):
+                images = self.move_right_images
+            else:
+                images = self.move_left_images
 
-        if direction_change:
-            self.animation_frame = 0
-        else:
-            self.animation_frame = self.animation_frame + 1 % len(images)
+            if direction_change:
+                self.animation_frame = 0
+                self.last_update = 0
+            elif self.last_update > self.update_freq:
+                self.animation_frame = (self.animation_frame + 1) % len(images)
+                self.last_update = 0
+            else:
+                self.last_update += 1
 
-        self.image = images[self.animation_frame]
+            self.image = images[self.animation_frame]
 
     def update(self) -> None:
         """Update state each time round the game loop.
