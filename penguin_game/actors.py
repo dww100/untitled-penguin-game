@@ -50,10 +50,7 @@ def is_actor_neighbour_in_direction(
 
     actor_direction = actor2.pos - actor1.pos
     difference = actor_direction - direction * TILE_SIZE
-    if difference.length() <= tolerance:
-        return True
-    else:
-        return False
+    return difference.length() <= tolerance
 
 
 class Block(Actor):
