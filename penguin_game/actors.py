@@ -3,6 +3,7 @@ import logging
 
 from os import path
 from typing import Union
+from .utils import play_sound
 
 import pygame as pg
 from pygame.math import Vector2
@@ -77,7 +78,7 @@ class Block(Actor):
             direction: direction of attempted push - determines movement direction.
         """
 
-        self.game.sounds['swoosh'].play()
+        play_sound(self.game.sounds['swoosh'])
 
         hits = pg.sprite.spritecollide(
             self, self.game.blocks, False, pg.sprite.collide_rect_ratio(1.1)
@@ -201,10 +202,18 @@ class Player(Actor):
         if len(hits) == 1 and is_actor_neighbour_in_direction(
             self, hits[0], self.facing
         ):
-
             hits[0].respond_to_push(self.facing)
             self.game.blocks.remove(hits)
             self.game.moving_blocks.add(hits)
+
+        hits = pg.sprite.spritecollide(
+            self, self.game.walls, False, pg.sprite.collide_circle_ratio(0.75)
+        )
+
+        if len(hits) == 1 and is_actor_neighbour_in_direction(
+            self, hits[0], self.facing
+        ):
+            play_sound(self.game.sounds['electric'])
 
     def reset(self):
         self.image.fill(self.original_colour)
@@ -239,8 +248,13 @@ class Player(Actor):
         super().update()
 
         # self.killed set during super.update()
+<<<<<<< HEAD
         if self.killed and self.death_timer is None:
             self.game.sounds['death_self'].play()
+=======
+        if self.killed:
+            play_sound(self.game.sounds['death_self'])
+>>>>>>> 41a2131 (better playback)
             self.lives -= 1
             self.frozen = True
             self.death_timer = DEATH_TIME
@@ -269,5 +283,5 @@ class Enemy(Actor):
             self.vel.y = init_vely * -1
 
         if self.killed:
-            self.game.sounds['death_enemy'].play()
+            play_sound(self.game.sounds['death_enemy'])
             self.kill()

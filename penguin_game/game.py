@@ -70,15 +70,15 @@ class Game:
         self.state = State.MENU
 
         self.sounds = {
-            'swoosh': pg.mixer.Sound(path.join(sound_dir, 'swoosh.wav')),
-            'death_self': pg.mixer.Sound(path.join(sound_dir, 'down_arp.wav')),
-            'death_enemy': pg.mixer.Sound(path.join(sound_dir, 'chords.wav')),
-            'electric': pg.mixer.Sound(path.join(sound_dir, 'electric.wav')),
+            'swoosh': (pg.mixer.Sound(path.join(sound_dir, 'swoosh.wav')), 0),
+            'death_self': (pg.mixer.Sound(path.join(sound_dir, 'down_arp.wav')), 1),
+            'death_enemy': (pg.mixer.Sound(path.join(sound_dir, 'chords.wav')), 2),
+            'electric': (pg.mixer.Sound(path.join(sound_dir, 'electric.wav')), 3),
         }
 
-        self.sounds['death_self'].set_volume(0.2)
-        self.sounds['death_enemy'].set_volume(0.6)
-        self.sounds['electric'].set_volume(0.2)
+        self.sounds['death_self'][0].set_volume(0.2)
+        self.sounds['death_enemy'][0].set_volume(0.6)
+        self.sounds['electric'][0].set_volume(0.2)
 
     def setup_play(self):
         """Initialize variables and setup for new game.
