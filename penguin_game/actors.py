@@ -54,7 +54,9 @@ def is_actor_neighbour_in_direction(
 
 
 class Block(Actor):
-    def __init__(self, game: "penguin_game.game.Game", x: int, y: int, diamond=False) -> None:
+    def __init__(
+        self, game: "penguin_game.game.Game", x: int, y: int, diamond=False
+    ) -> None:
         """Block Sprite.
 
         Args:
@@ -65,11 +67,23 @@ class Block(Actor):
         """
 
         if diamond:
-            static_images = [pg.image.load(path.join(image_dir, 'block_yellow64x64.png')).convert_alpha()]
+            static_images = [
+                pg.image.load(
+                    path.join(image_dir, "block_yellow64x64.png")
+                ).convert_alpha()
+            ]
         else:
-            static_images = [pg.image.load(path.join(image_dir, 'block64x64.png')).convert_alpha()]
+            static_images = [
+                pg.image.load(path.join(image_dir, "block64x64.png")).convert_alpha()
+            ]
 
-        super().__init__(game, x, y, additional_groups=game.blocks, no_movement_images=static_images)
+        super().__init__(
+            game, x, y, additional_groups=game.blocks,
+            move_up_images=static_images,
+            move_down_images=static_images,
+            move_left_images=static_images,
+            move_right_images=static_images,
+        )
 
     def respond_to_push(self, direction: Vector2):
         """Respond to a push by moving in a direction if free to do so or breaking.
@@ -114,6 +128,7 @@ class Block(Actor):
             self.game.moving_blocks.remove(self)
             self.game.blocks.add(self)
 
+
 class Player(Actor):
     def __init__(self, game: "penguin_game.game.Game", x: int, y: int,) -> None:
         """Player Sprite.
@@ -123,11 +138,9 @@ class Player(Actor):
             x: Horizontal starting position in pixels.
             y: Vertical starting position in pixels.
         """
-        super().__init__(game, x, y, additional_groups=None)
+        super().__init__(game, x, y, initial_direction=Vector2(0, 1), additional_groups=None, colour=YELLOW)
         self.stopped_by.append(game.blocks)
         self.killed_by.append(game.enemies)
-        # Start facing left
-        self.facing = Vector2(-1, 0)
         self.vel = Vector2(0, 0)
         self.last_pos = Vector2(x, y)
         self.lives = 2
@@ -144,9 +157,14 @@ class Player(Actor):
 
             xcross = False
             ycross = False
-            if abs((self.pos.x % TILE_SIZE)-(self.last_pos.x % TILE_SIZE)) > (TILE_SIZE /2):
+            if abs((self.pos.x % TILE_SIZE) - (self.last_pos.x % TILE_SIZE)) > (
+                TILE_SIZE / 2
+            ):
                 xcross = True
-            if abs(((self.pos.y+INFO_HEIGHT) % TILE_SIZE)-((self.last_pos.y+INFO_HEIGHT) % TILE_SIZE)) > (TILE_SIZE /2):
+            if abs(
+                ((self.pos.y + INFO_HEIGHT) % TILE_SIZE)
+                - ((self.last_pos.y + INFO_HEIGHT) % TILE_SIZE)
+            ) > (TILE_SIZE / 2):
                 ycross = True
 
             if xcross or ycross or (self.vel.x == 0 and self.vel.y == 0):
@@ -163,13 +181,13 @@ class Player(Actor):
                 elif keys[pg.K_DOWN]:
                     self.facing = Vector2(0, 1)
                     self.vel = self.facing * PLAYER_SPEED
-                else: 
+                else:
                     self.vel = Vector2(0, 0)
                     if xcross:
                         self.pos.x -= self.pos.x % TILE_SIZE
                     if ycross:
-                        self.pos.y -= (self.pos.y+INFO_HEIGHT) % TILE_SIZE
-           
+                        self.pos.y -= (self.pos.y + INFO_HEIGHT) % TILE_SIZE
+
         else:
             self.vel = Vector2(0, 0)
             if keys[pg.K_LEFT]:
@@ -190,7 +208,6 @@ class Player(Actor):
 
         self.last_pos = Vector2(self.pos)
 
-
     def push(self) -> None:
         """Look for block to push and if one is close in direction faced - push it.
         """
@@ -202,6 +219,7 @@ class Player(Actor):
         if len(hits) == 1 and is_actor_neighbour_in_direction(
             self, hits[0], self.facing
         ):
+
             hits[0].respond_to_push(self.facing)
             self.game.blocks.remove(hits)
             self.game.moving_blocks.add(hits)
@@ -213,7 +231,7 @@ class Player(Actor):
         if len(hits) == 1 and is_actor_neighbour_in_direction(
             self, hits[0], self.facing
         ):
-            hits[0].respond_to_push(self.facing)
+            play_sound(self.game.sounds['electric'])
 
     def reset(self):
         self.image.fill(self.original_colour)
@@ -248,7 +266,7 @@ class Player(Actor):
         super().update()
 
         # self.killed set during super.update()
-        if self.killed:
+        if self.killed and self.death_timer is None:
             play_sound(self.game.sounds['death_self'])
             self.lives -= 1
             self.frozen = True
@@ -257,25 +275,53 @@ class Player(Actor):
 
 class Enemy(Actor):
     def __init__(
-        self, game, x, y, initial_direction: "pygame.math.Vector2" = Vector2(0, 1)
+        self, game, x, y, initial_direction: "pygame.math.Vector2" = Vector2(0, 1),
     ):
 
-        super().__init__(game, x, y, additional_groups=game.enemies, colour=BLUE)
+        move_up_images = [
+            pg.image.load(path.join(image_dir, "chick_back.png")).convert_alpha()
+        ]
+        move_down_images = [
+            pg.image.load(path.join(image_dir, "chick_front.png")).convert_alpha()
+        ]
+        move_left_images = [
+            pg.image.load(path.join(image_dir, "chick_left.png")).convert_alpha()
+        ]
+        move_right_images = [
+            pg.image.load(path.join(image_dir, "chick_right.png")).convert_alpha()
+        ]
+
+        super().__init__(
+            game,
+            x,
+            y,
+            initial_direction=initial_direction,
+            additional_groups=game.enemies,
+            move_up_images=move_up_images,
+            move_down_images=move_down_images,
+            move_left_images=move_left_images,
+            move_right_images=move_right_images,
+        )
+
         self.stopped_by.append(game.blocks)
         self.killed_by.append(game.moving_blocks)
-        self.facing = initial_direction
         self.vel = self.facing * ENEMY_SPEED
 
     def update(self) -> None:
-        init_velx = self.vel.x
-        init_vely = self.vel.y
+
+        init_vel = Vector2(self.vel)
 
         super().update()
 
         if not self.vel.magnitude():
 
-            self.vel.x = init_velx * -1
-            self.vel.y = init_vely * -1
+            self.vel = init_vel * -1
+            self.facing = self.facing * -1
+
+            self.update_animation(direction_change=True)
+
+        else:
+            self.update_animation()
 
         if self.killed:
             play_sound(self.game.sounds['death_enemy'])
