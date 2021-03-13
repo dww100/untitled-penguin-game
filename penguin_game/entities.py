@@ -79,7 +79,7 @@ class Actor(Sprite):
         self.pos.y += INFO_HEIGHT
         self.vel = Vector2(0, 0)
 
-        self.original_pos = self.pos
+        self.original_pos = Vector2(self.pos)
         self.original_colour = colour
 
         self.stopped_by = [self.game.walls]
@@ -108,6 +108,8 @@ class Actor(Sprite):
                 self.vel.x = 0
                 self.rect.x = self.pos.x
 
+                self.blockedX = True
+
             else:
                 # Y axis: +ve = down, -ve = up
                 if self.vel.y > 0:
@@ -117,31 +119,45 @@ class Actor(Sprite):
                 self.vel.y = 0
                 self.rect.y = self.pos.y
 
+                self.blockedY = True
+
             return True
 
         else:
 
             return False
 
-    def check_fatal_collisions(self):
+    def check_fatal_collisions(self) -> bool:
+        """Check for collisions that could kill the Actor.
+
+        Sets the `self.vel = (0, 0)` if so.
+
+        Returns:
+            Has the Actor collided with anything in the `self.killed_by`
+            list of sprite groups.
+        """
 
         if not self.killed_by:
             return False
+
+        killed = False
 
         for killer in self.killed_by:
             killed_x = self.collide_and_stop(killer, Axis.X)
             killed_y = self.collide_and_stop(killer, Axis.Y)
 
-        if killed_x or killed_y:
-            self.vel = Vector2(0, 0)
-            return True
+            if killed_x or killed_y:
+                self.vel = Vector2(0, 0)
+                killed = True
 
-        return False
+        return killed
 
     def update(self) -> None:
         """Update state each time round the game loop.
         Handles movement and wall collisions.
         """
+        self.blockedX = False
+        self.blockedY = False
 
         # Scale movement to ensure reliable frame rate.
         self.pos += self.vel * self.game.dt
