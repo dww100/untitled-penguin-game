@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging
 
 from enum import Enum
-from typing import Union, List, Tuple
+from typing import Optional, Union, List, Tuple
 
 import pygame as pg
 from pygame.sprite import Sprite
@@ -39,6 +39,9 @@ class Wall(Sprite):
         self.rect.y = y * TILE_SIZE
         self.rect.y += INFO_HEIGHT
 
+    def respond_to_push(self, direction):
+        play_sound(self.game.sounds['electric'])
+
 
 class Actor(Sprite):
     def __init__(
@@ -46,13 +49,13 @@ class Actor(Sprite):
         game: "penguin_game.game.Game",
         x: int,
         y: int,
+        initial_direction: "pygame.math.Vector2" = Vector2(0, 1),
         additional_groups: Union[pg.sprite.Group, List[pg.sprite.Group], None] = None,
-        no_movement_images: List[pg.Surface] = None,
         move_up_images: List[pg.Surface] = None,
         move_down_images: List[pg.Surface] = None,
         move_left_images: List[pg.Surface] = None,
         move_right_images: List[pg.Surface] = None,
-        colour: Tuple[int, int, int] = YELLOW,
+        colour: Optional[Tuple[int, int, int]] = None,
     ) -> None:
         """Base class for active Sprites that move and interact with their environment.
 
@@ -75,13 +78,29 @@ class Actor(Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
 
-        if no_movement_images is not None:
-            self.no_movement_images = no_movement_images
-            self.image = self.no_movement_images[0]
-        else:
-            self.no_movement_images = [pg.Surface((TILE_SIZE, TILE_SIZE))]
-            self.image = self.no_movement_images[0]
+        self.facing = initial_direction
+
+        self.animation_frame = 0
+        self.last_update = 0
+        self.update_freq = 5
+
+        if colour is not None:
+            images = [pg.Surface((TILE_SIZE, TILE_SIZE))]
+
+            self.move_up_images = images
+            self.move_down_images = images
+            self.move_left_images = images
+            self.move_right_images = images
+            self.image = images[0]
             self.image.fill(colour)
+
+        else:
+
+            self.move_up_images = move_up_images
+            self.move_down_images = move_down_images
+            self.move_left_images = move_left_images
+            self.move_right_images = move_right_images
+            self.image = move_down_images[0]
 
         self.rect = self.image.get_rect()
         self.rect.x = x * TILE_SIZE
@@ -160,6 +179,29 @@ class Actor(Sprite):
 
         return killed
 
+    def update_animation(self, direction_change=False):
+
+        if self.vel != Vector2(0, 0):
+            if self.facing == Vector2(0, 1):
+                images = self.move_down_images
+            elif self.facing == Vector2(0, -1):
+                images = self.move_up_images
+            elif self.facing == Vector2(1, 0):
+                images = self.move_right_images
+            else:
+                images = self.move_left_images
+
+            if direction_change:
+                self.animation_frame = 0
+                self.last_update = 0
+            elif self.last_update > self.update_freq:
+                self.animation_frame = (self.animation_frame + 1) % len(images)
+                self.last_update = 0
+            else:
+                self.last_update += 1
+
+            self.image = images[self.animation_frame]
+
     def update(self) -> None:
         """Update state each time round the game loop.
         Handles movement and wall collisions.
@@ -176,4 +218,3 @@ class Actor(Sprite):
             for stopper in self.stopped_by:
                 self.collide_and_stop(stopper, Axis.X)
                 self.collide_and_stop(stopper, Axis.Y)
-

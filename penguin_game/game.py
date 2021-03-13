@@ -69,15 +69,15 @@ class Game:
         self.state = State.MENU
 
         self.sounds = {
-            'swoosh': pg.mixer.Sound(path.join(sound_dir, 'swoosh.wav')),
-            'death_self': pg.mixer.Sound(path.join(sound_dir, 'down_arp.wav')),
-            'death_enemy': pg.mixer.Sound(path.join(sound_dir, 'chords.wav')),
-            'electric': pg.mixer.Sound(path.join(sound_dir, 'electric.wav')),
+            'swoosh': (pg.mixer.Sound(path.join(sound_dir, 'swoosh.wav')), 0),
+            'death_self': (pg.mixer.Sound(path.join(sound_dir, 'down_arp.wav')), 1),
+            'death_enemy': (pg.mixer.Sound(path.join(sound_dir, 'chords.wav')), 2),
+            'electric': (pg.mixer.Sound(path.join(sound_dir, 'electric.wav')), 3),
         }
 
-        self.sounds['death_self'].set_volume(0.2)
-        self.sounds['death_enemy'].set_volume(0.2)
-        self.sounds['electric'].set_volume(0.2)
+        self.sounds['death_self'][0].set_volume(0.2)
+        self.sounds['death_enemy'][0].set_volume(0.6)
+        self.sounds['electric'][0].set_volume(0.2)
 
     def setup_play(self):
         """Initialize variables and setup for new game.
@@ -163,7 +163,7 @@ class Game:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.quit()
-                elif event.type == pg.KEYDOWN:
+                elif event.type == pg.KEYUP:
                     if event.key == pg.K_ESCAPE:
                         self.quit()
                     else:
@@ -247,13 +247,15 @@ class Game:
         """Draw info line - lives and score
         """
 
+        self.draw_text(f"Lives:", size=24, color=WHITE, x=50, y=6)
+
         icon_size = INFO_HEIGHT - 6
 
         for i in range(self.player.lives):
             life_icon = pg.Surface((icon_size, icon_size))
             life_icon.fill(YELLOW)
             life_rect = life_icon.get_rect()
-            life_rect.x = 3 + (INFO_HEIGHT - 2) * i
+            life_rect.x = 100 + (INFO_HEIGHT - 2) * i
             life_rect.y = 3
             self.screen.blit(life_icon, life_rect)
 
