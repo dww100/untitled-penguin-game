@@ -8,6 +8,8 @@ import pygame as pg
 from pygame.sprite import Sprite
 from pygame.math import Vector2
 
+from .utils import play_sound
+
 from .settings import TILE_SIZE, GREEN, YELLOW, INFO_HEIGHT
 
 LOGGER = logging.getLogger(__name__)
