@@ -266,7 +266,7 @@ class Player(Actor):
             play_sound(self.game.sounds["electric"])
 
     def reset(self):
-        self.image.fill(self.original_colour)
+        self.facing = Vector2(0, 1)
         self.pos = self.original_pos
         self.death_timer = None
         self.frozen = False
