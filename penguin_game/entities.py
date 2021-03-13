@@ -123,20 +123,30 @@ class Actor(Sprite):
 
             return False
 
-    def check_fatal_collisions(self):
+    def check_fatal_collisions(self) -> bool:
+        """Check for collisions that could kill the Actor.
+
+        Sets the `self.vel = (0, 0)` if so.
+
+        Returns:
+            Has the Actor collided with anything in the `self.killed_by`
+            list of sprite groups.
+        """
 
         if not self.killed_by:
             return False
+
+        killed = False
 
         for killer in self.killed_by:
             killed_x = self.collide_and_stop(killer, Axis.X)
             killed_y = self.collide_and_stop(killer, Axis.Y)
 
-        if killed_x or killed_y:
-            self.vel = Vector2(0, 0)
-            return True
+            if killed_x or killed_y:
+                self.vel = Vector2(0, 0)
+                killed = True
 
-        return False
+        return killed
 
     def update(self) -> None:
         """Update state each time round the game loop.
