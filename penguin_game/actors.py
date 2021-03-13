@@ -205,6 +205,8 @@ class Enemy(Actor):
         init_velx = self.vel.x
         init_vely = self.vel.y
 
+        super().update()
+
         if self.blockedX:
             self.vel.x = init_velx * -1
         if self.blockedY:
