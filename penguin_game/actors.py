@@ -260,7 +260,7 @@ class Player(Actor):
             self, self.game.walls, False, pg.sprite.collide_circle_ratio(0.75)
         )
 
-        if len(hits) == 1 and is_actor_neighbour_in_direction(
+        if len(hits) > 0 and is_actor_neighbour_in_direction(
             self, hits[0], self.facing
         ):
             play_sound(self.game.sounds["electric"])
