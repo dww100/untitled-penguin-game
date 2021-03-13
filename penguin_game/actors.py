@@ -269,4 +269,5 @@ class Enemy(Actor):
             self.vel.y = init_vely * -1
 
         if self.killed:
+            self.game.sounds['death_enemy'].play()
             self.kill()
