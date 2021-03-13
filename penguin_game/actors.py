@@ -145,8 +145,12 @@ class Player(Actor):
         self.death_timer = None
         self.frozen = False
 
-    def death_update(self):
+    def death_update(self) -> None:
+        """Update the death times and image shown after player dies.
+        """
         self.death_timer -= 1
+
+        # TODO: Replace with a good animation
         if self.death_timer % 2:
             self.image.fill(WHITE)
         else:
@@ -155,17 +159,19 @@ class Player(Actor):
     def update(self) -> None:
         """Update state each time round the game loop.
         Checks for user input, then handles movement and wall collisions.
-
         """
 
+        # Player could be frozen on death or a restart - ignore user input
         if not self.frozen:
             self.get_keys()
 
+        # Enact post death animation while timer is set
         if self.death_timer is not None:
             self.death_update()
 
         super().update()
 
+        # self.killed set during super.update()
         if self.killed:
             self.lives -= 1
             self.frozen = True
