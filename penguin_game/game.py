@@ -15,6 +15,7 @@ from .settings import (
     TILE_SIZE,
     BG_COLOR,
     RED,
+    YELLOW,
     LIGHT_GREY,
     WHITE,
     TITLE,
@@ -217,7 +218,16 @@ class Game:
     def draw_info(self) -> None:
         """Draw info line - lives and score
         """
-        pass
+
+        icon_size = INFO_HEIGHT - 5
+
+        for i in range(self.player.lives):
+            life_icon = pg.Surface((icon_size, icon_size))
+            life_icon.fill(YELLOW)
+            life_rect = life_icon.get_rect()
+            life_rect.x = 0 + (INFO_HEIGHT + 2) * i
+            life_rect.y = 6
+            self.screen.blit(life_icon, life_rect)
 
     def draw(self) -> None:
         """Draw new frame to the screen.
