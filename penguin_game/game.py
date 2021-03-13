@@ -219,14 +219,14 @@ class Game:
         """Draw info line - lives and score
         """
 
-        icon_size = INFO_HEIGHT - 5
+        icon_size = INFO_HEIGHT - 6
 
         for i in range(self.player.lives):
             life_icon = pg.Surface((icon_size, icon_size))
             life_icon.fill(YELLOW)
             life_rect = life_icon.get_rect()
-            life_rect.x = 0 + (INFO_HEIGHT + 2) * i
-            life_rect.y = 6
+            life_rect.x = 3 + (INFO_HEIGHT -2) * i
+            life_rect.y = 3
             self.screen.blit(life_icon, life_rect)
 
     def draw(self) -> None:
