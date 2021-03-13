@@ -63,9 +63,9 @@ class Block(Actor):
         """
 
         if diamond:
-            static_images = [pg.image.load(path.join(image_dir, 'block_yellow64x64.png')).convert()]
+            static_images = [pg.image.load(path.join(image_dir, 'block_yellow64x64.png')).convert_alpha()]
         else:
-            static_images = [pg.image.load(path.join(image_dir, 'block64x64.png')).convert()]
+            static_images = [pg.image.load(path.join(image_dir, 'block64x64.png')).convert_alpha()]
 
         super().__init__(game, x, y, additional_groups=game.blocks, no_movement_images=static_images)
 
@@ -95,7 +95,9 @@ class Block(Actor):
     def check_for_squish(self):
         """If Block collides with an enemy the enemy should die.
         """
-        pg.sprite.spritecollide(self, self.game.enemies, True)
+        hits = pg.sprite.spritecollide(self, self.game.enemies, True)
+        if hits:
+            LOGGER.debug(hits)
 
     def update(self) -> None:
         """Update state each time round the game loop.
@@ -142,7 +144,7 @@ class Player(Actor):
                 ycross = True
 
             if xcross or ycross or (self.vel.x == 0 and self.vel.y == 0):
-                print(xcross, ycross, self.pos, TILE_SIZE)
+                # LOGGER.debug(xcross, ycross, self.pos, TILE_SIZE)
                 if keys[pg.K_LEFT]:
                     self.facing = Vector2(-1,0)
                     self.vel = self.facing * PLAYER_SPEED
