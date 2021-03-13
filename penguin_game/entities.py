@@ -150,7 +150,6 @@ class Actor(Sprite):
 
         killed = False
 
-        print(self.killed_by)
         for killer in self.killed_by:
             killed_x = self.collide_and_stop(killer, Axis.X)
             killed_y = self.collide_and_stop(killer, Axis.Y)
