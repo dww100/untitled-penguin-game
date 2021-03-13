@@ -106,6 +106,10 @@ class Game:
         sys.exit()
 
     def run(self) -> None:
+        pygame.mixer.init()
+        pygame.mixer.music.load('sounds/theme.wav')
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.play(-1, fade_ms=1000)
         while True:
             if self.state == State.MENU:
                 self.show_menu()
