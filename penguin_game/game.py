@@ -71,6 +71,8 @@ class Game:
         self.sounds['death_self'].set_volume(0.2)
         self.sounds['death_enemy'] = pg.mixer.Sound('sounds/chords.wav')
         self.sounds['death_enemy'].set_volume(0.2)
+        self.sounds['electric'] = pg.mixer.Sound('sounds/electric.wav')
+        self.sounds['electric'].set_volume(0.2)
 
     def setup_play(self):
         """Initialize variables and setup for new game.
@@ -106,6 +108,10 @@ class Game:
         sys.exit()
 
     def run(self) -> None:
+        pg.mixer.init()
+        pg.mixer.music.load('sounds/theme.wav')
+        pg.mixer.music.set_volume(0.1)
+        pg.mixer.music.play(-1, fade_ms=1000)
         while True:
             if self.state == State.MENU:
                 self.show_menu()
@@ -188,6 +194,9 @@ class Game:
         """
 
         self.setup_play()
+        pg.mixer.music.load('sounds/theme_full.wav')
+        pg.mixer.music.set_volume(0.3)
+        pg.mixer.music.play(-1, fade_ms=1000)
 
         while self.state == State.PLAY:
             # Using clock.tick each loop ensures framerate is limited to target FPS

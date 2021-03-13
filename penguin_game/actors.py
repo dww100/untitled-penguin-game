@@ -1,6 +1,7 @@
 from __future__ import annotations
 import logging
 
+from os import path
 from typing import Union
 
 import pygame as pg
@@ -8,6 +9,7 @@ from pygame.math import Vector2
 
 from .settings import (
     TILE_SIZE,
+    INFO_HEIGHT,
     PLAYER_SPEED,
     DEATH_TIME,
     BLOCK_SPEED,
@@ -18,6 +20,8 @@ from .settings import (
     WHITE,
 )
 from .entities import Actor, Wall
+
+image_dir = path.join(path.dirname(__file__), "images")
 
 LOGGER = logging.getLogger(__name__)
 
@@ -49,16 +53,22 @@ def is_actor_neighbour_in_direction(
 
 
 class Block(Actor):
-    def __init__(self, game: "penguin_game.game.Game", x: int, y: int,) -> None:
+    def __init__(self, game: "penguin_game.game.Game", x: int, y: int, diamond=False) -> None:
         """Block Sprite.
 
         Args:
             game: Game that this Sprite is associated with (provides access to timing, etc).
             x: Horizontal starting position in pixels.
             y: Vertical starting position in pixels.
+            diamond: Is this a diamond?
         """
-        super().__init__(game, x, y, additional_groups=game.blocks)
-        self.image.fill(RED)
+
+        if diamond:
+            static_images = [pg.image.load(path.join(image_dir, 'block_yellow64x64.png')).convert_alpha()]
+        else:
+            static_images = [pg.image.load(path.join(image_dir, 'block64x64.png')).convert_alpha()]
+
+        super().__init__(game, x, y, additional_groups=game.blocks, no_movement_images=static_images)
 
     def respond_to_push(self, direction: Vector2):
         """Respond to a push by moving in a direction if free to do so or breaking.
@@ -93,7 +103,9 @@ class Block(Actor):
     def check_for_squish(self):
         """If Block collides with an enemy the enemy should die.
         """
-        pg.sprite.spritecollide(self, self.game.enemies, True)
+        hits = pg.sprite.spritecollide(self, self.game.enemies, True)
+        if hits:
+            LOGGER.debug(hits)
 
     def update(self) -> None:
         """Update state each time round the game loop.
@@ -118,29 +130,68 @@ class Player(Actor):
         self.killed_by.append(game.enemies)
         # Start facing left
         self.facing = Vector2(-1, 0)
+        self.vel = Vector2(0, 0)
+        self.last_pos = Vector2(x, y)
         self.lives = 2
         self.frozen = False
         self.death_timer = None
+        self.snap_to_grid = True
 
     def get_keys(self) -> None:
         """Handle keyboard input.
         """
-        self.vel = Vector2(0, 0)
         keys = pg.key.get_pressed()
-        if keys[pg.K_LEFT]:
-            self.facing = Vector2(-1, 0)
-            self.vel = self.facing * PLAYER_SPEED
-        if keys[pg.K_RIGHT]:
-            self.facing = Vector2(1, 0)
-            self.vel = self.facing * PLAYER_SPEED
-        if keys[pg.K_UP]:
-            self.facing = Vector2(0, -1)
-            self.vel = self.facing * PLAYER_SPEED
-        if keys[pg.K_DOWN]:
-            self.facing = Vector2(0, 1)
-            self.vel = self.facing * PLAYER_SPEED
+
+        if self.snap_to_grid:
+
+            xcross = False
+            ycross = False
+            if abs((self.pos.x % TILE_SIZE)-(self.last_pos.x % TILE_SIZE)) > (TILE_SIZE /2):
+                xcross = True
+            if abs(((self.pos.y+INFO_HEIGHT) % TILE_SIZE)-((self.last_pos.y+INFO_HEIGHT) % TILE_SIZE)) > (TILE_SIZE /2):
+                ycross = True
+
+            if xcross or ycross or (self.vel.x == 0 and self.vel.y == 0):
+                # LOGGER.debug(xcross, ycross, self.pos, TILE_SIZE)
+                if keys[pg.K_LEFT]:
+                    self.facing = Vector2(-1, 0)
+                    self.vel = self.facing * PLAYER_SPEED
+                elif keys[pg.K_RIGHT]:
+                    self.facing = Vector2(1, 0)
+                    self.vel = self.facing * PLAYER_SPEED
+                elif keys[pg.K_UP]:
+                    self.facing = Vector2(0, -1)
+                    self.vel = self.facing * PLAYER_SPEED
+                elif keys[pg.K_DOWN]:
+                    self.facing = Vector2(0, 1)
+                    self.vel = self.facing * PLAYER_SPEED
+                else: 
+                    self.vel = Vector2(0, 0)
+                    if xcross:
+                        self.pos.x -= self.pos.x % TILE_SIZE
+                    if ycross:
+                        self.pos.y -= (self.pos.y+INFO_HEIGHT) % TILE_SIZE
+           
+        else:
+            self.vel = Vector2(0, 0)
+            if keys[pg.K_LEFT]:
+                self.facing = Vector2(-1, 0)
+                self.vel = self.facing * PLAYER_SPEED
+            if keys[pg.K_RIGHT]:
+                self.facing = Vector2(1, 0)
+                self.vel = self.facing * PLAYER_SPEED
+            if keys[pg.K_UP]:
+                self.facing = Vector2(0, -1)
+                self.vel = self.facing * PLAYER_SPEED
+            if keys[pg.K_DOWN]:
+                self.facing = Vector2(0, 1)
+                self.vel = self.facing * PLAYER_SPEED
+
         if keys[pg.K_SPACE]:
             self.push()
+
+        self.last_pos = Vector2(self.pos)
+
 
     def push(self) -> None:
         """Look for block to push and if one is close in direction faced - push it.
