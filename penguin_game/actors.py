@@ -76,12 +76,6 @@ class Block(Actor):
         Args:
             direction: direction of attempted push - determines movement direction.
         """
-        self.game.blocks.remove([self])
-        self.game.moving_blocks.add(self)
-        print('resp')
-        print(self.game.moving_blocks.has())
-        print(self.game.blocks.has())
-        print()
 
         self.game.sounds['swoosh'].play()
 
@@ -115,6 +109,9 @@ class Block(Actor):
             self.check_for_squish()
         super().update()
 
+        if self.vel.magnitude() == 0:
+            self.game.moving_blocks.remove(self)
+            self.game.blocks.add(self)
 
 class Player(Actor):
     def __init__(self, game: "penguin_game.game.Game", x: int, y: int,) -> None:
@@ -206,10 +203,8 @@ class Player(Actor):
         ):
 
             hits[0].respond_to_push(self.facing)
-            print(hits)
+            self.game.blocks.remove(hits)
             self.game.moving_blocks.add(hits)
-            print(hits)
-            print(self.game.moving_blocks.has())
 
     def reset(self):
         self.image.fill(self.original_colour)
@@ -253,7 +248,7 @@ class Player(Actor):
 
 class Enemy(Actor):
     def __init__(
-        self, game, x, y, initial_direction: "pygame.math.Vector2" = Vector2(1, 0)
+        self, game, x, y, initial_direction: "pygame.math.Vector2" = Vector2(0, 1)
     ):
 
         super().__init__(game, x, y, additional_groups=game.enemies, colour=BLUE)
@@ -265,14 +260,6 @@ class Enemy(Actor):
     def update(self) -> None:
         init_velx = self.vel.x
         init_vely = self.vel.y
-    
-
-        #hits = pg.sprite.spritecollide(self, self.game.blocks, False)
-        #print(hits)
-        #for hit in hits:
-        #    print('hit block', hit.vel.magnitude())
-        #    if hit.vel.magnitude():
-        #        self.kill()
 
         super().update()
 
@@ -281,3 +268,5 @@ class Enemy(Actor):
             self.vel.x = init_velx * -1
             self.vel.y = init_vely * -1
 
+        if self.killed:
+            self.kill()
