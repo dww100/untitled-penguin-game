@@ -95,7 +95,6 @@ class Game:
         self.player = Player(self, 5, 5)
         self.make_boundary_wall()
 
-
     def make_boundary_wall(self) -> None:
         """Create boundary for `Wall` Sprites around game grid.
         """
@@ -115,7 +114,7 @@ class Game:
 
     def run(self) -> None:
         pg.mixer.init()
-        pg.mixer.music.load('sounds/theme.wav')
+        pg.mixer.music.load(path.join(sound_dir, 'theme.wav'))
         pg.mixer.music.set_volume(0.1)
         pg.mixer.music.play(-1, fade_ms=1000)
         while True:
@@ -200,7 +199,7 @@ class Game:
         """
 
         self.setup_play()
-        pg.mixer.music.load('sounds/theme_full.wav')
+        pg.mixer.music.load(path.join(sound_dir, 'theme_full.wav'))
         pg.mixer.music.set_volume(0.3)
         pg.mixer.music.play(-1, fade_ms=1000)
 
