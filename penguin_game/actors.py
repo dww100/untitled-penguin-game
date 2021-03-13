@@ -100,29 +100,68 @@ class Player(Actor):
         self.killed_by.append(game.enemies)
         # Start facing left
         self.facing = Vector2(-1, 0)
+        self.vel = Vector2(0, 0)
+        self.last_pos = Vector2(x, y)
         self.lives = 2
         self.frozen = False
         self.death_timer = None
+        self.snap_to_grid = True
 
     def get_keys(self) -> None:
         """Handle keyboard input.
         """
-        self.vel = Vector2(0, 0)
         keys = pg.key.get_pressed()
-        if keys[pg.K_LEFT]:
-            self.facing = Vector2(-1, 0)
-            self.vel = self.facing * PLAYER_SPEED
-        if keys[pg.K_RIGHT]:
-            self.facing = Vector2(1, 0)
-            self.vel = self.facing * PLAYER_SPEED
-        if keys[pg.K_UP]:
-            self.facing = Vector2(0, -1)
-            self.vel = self.facing * PLAYER_SPEED
-        if keys[pg.K_DOWN]:
-            self.facing = Vector2(0, 1)
-            self.vel = self.facing * PLAYER_SPEED
+
+        if self.snap_to_grid:
+
+            xcross = False
+            ycross = False
+            if abs((self.pos.x % TILE_SIZE)-(self.last_pos.x % TILE_SIZE)) > (TILE_SIZE /2):
+                xcross = True
+            if abs(((self.pos.y+32) % TILE_SIZE)-((self.last_pos.y+32) % TILE_SIZE)) > (TILE_SIZE /2):
+                ycross = True
+
+            if xcross or ycross or (self.vel.x == 0 and self.vel.y == 0):
+                print(xcross, ycross, self.pos, TILE_SIZE)
+                if keys[pg.K_LEFT]:
+                    self.facing = Vector2(-1,0)
+                    self.vel = self.facing * PLAYER_SPEED
+                elif keys[pg.K_RIGHT]:
+                    self.facing = Vector2(1,0)
+                    self.vel = self.facing * PLAYER_SPEED
+                elif keys[pg.K_UP]:
+                    self.facing = Vector2(0,-1)
+                    self.vel = self.facing * PLAYER_SPEED
+                elif keys[pg.K_DOWN]:
+                    self.facing = Vector2(0,1)
+                    self.vel = self.facing * PLAYER_SPEED
+                else: 
+                    self.vel = Vector2(0,0)
+                    if xcross:
+                        self.pos.x -= self.pos.x % TILE_SIZE
+                    if ycross:
+                        self.pos.y -= (self.pos.y+32) % TILE_SIZE
+           
+        else:
+            self.vel = Vector2(0, 0)
+            if keys[pg.K_LEFT]:
+                self.facing = Vector2(-1, 0)
+                self.vel = self.facing * PLAYER_SPEED
+            if keys[pg.K_RIGHT]:
+                self.facing = Vector2(1, 0)
+                self.vel = self.facing * PLAYER_SPEED
+            if keys[pg.K_UP]:
+                self.facing = Vector2(0, -1)
+                self.vel = self.facing * PLAYER_SPEED
+            if keys[pg.K_DOWN]:
+                self.facing = Vector2(0, 1)
+                self.vel = self.facing * PLAYER_SPEED
+
         if keys[pg.K_SPACE]:
             self.push()
+
+        self.last_pos = Vector2(self.pos)
+
 
     def push(self) -> None:
         """Look for block to push and if one is close in direction faced - push it.
