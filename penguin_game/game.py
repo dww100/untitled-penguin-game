@@ -1,4 +1,5 @@
 import logging
+from os import path
 import sys
 from enum import Enum
 from typing import Optional, Tuple
@@ -24,6 +25,9 @@ from .actors import Player, Block, Enemy
 from .entities import Wall
 
 LOGGER = logging.getLogger(__name__)
+
+image_dir = path.join(path.dirname(__file__), 'images')
+sound_dir = path.join(path.dirname(__file__), 'sounds')
 
 
 class State(Enum):
@@ -65,13 +69,15 @@ class Game:
 
         self.state = State.MENU
 
-        self.sounds = {}
-        self.sounds['swoosh'] = pg.mixer.Sound('sounds/swoosh.wav')
-        self.sounds['death_self'] = pg.mixer.Sound('sounds/down_arp.wav')
+        self.sounds = {
+            'swoosh': pg.mixer.Sound(path.join(sound_dir, 'swoosh.wav')),
+            'death_self': pg.mixer.Sound(path.join(sound_dir, 'down_arp.wav')),
+            'death_enemy': pg.mixer.Sound(path.join(sound_dir, 'chords.wav')),
+            'electric': pg.mixer.Sound(path.join(sound_dir, 'electric.wav')),
+        }
+
         self.sounds['death_self'].set_volume(0.2)
-        self.sounds['death_enemy'] = pg.mixer.Sound('sounds/chords.wav')
         self.sounds['death_enemy'].set_volume(0.2)
-        self.sounds['electric'] = pg.mixer.Sound('sounds/electric.wav')
         self.sounds['electric'].set_volume(0.2)
 
     def setup_play(self):
