@@ -14,7 +14,9 @@ class Level(object):
 
     def __init__(self, fname):
         self.fname = fname
-        self.height, self.width = self.validate_input(self.fname)
+        height, width = self.validate_input(self.fname)
+        self.height = height + 2
+        self.width = width + 2
 
     def load_sprites(self, game):
         def init_sprite(i, j, char):
@@ -28,7 +30,7 @@ class Level(object):
         with open(self.fname, 'r') as f:
             for i, line in enumerate(f):
                 for j, char in enumerate(line):
-                    init_sprite(i, j, char)
+                    init_sprite(i+1, j+1, char)
 
     def validate_input(self, fname):
         n_lines = 0
@@ -45,8 +47,8 @@ class Level(object):
                                                   must be one of {ELEMENTS}"
 
         n_cols -= 1 # ignore new line char
-        assert n_lines < MAX_GRID_HEIGHT
-        assert n_cols < MAX_GRID_WIDTH
+        assert n_lines <= MAX_GRID_HEIGHT - 2 # account for wall
+        assert n_cols <= MAX_GRID_WIDTH - 2
 
         return n_lines, n_cols
 
