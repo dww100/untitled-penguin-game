@@ -188,6 +188,9 @@ class Game:
         """
 
         self.setup_play()
+        pg.mixer.music.load('sounds/theme_full.wav')
+        pg.mixer.music.set_volume(0.3)
+        pg.mixer.music.play(-1, fade_ms=1000)
 
         while self.state == State.PLAY:
             # Using clock.tick each loop ensures framerate is limited to target FPS
