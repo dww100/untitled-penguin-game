@@ -2,7 +2,7 @@ from .settings import MAX_GRID_HEIGHT, MAX_GRID_WIDTH
 from .actors import Player, Block, Enemy
 
 ELEMENTS = {
-        ' ': None,
+        '.': None,
         '0': Block,
         '1': Player,
         '2': Enemy,
@@ -12,13 +12,37 @@ ELEMENTS = {
 
 class Level(object):
 
-    def __init__(self, fname):
-        self.fname = fname
-        height, width = self.validate_input(self.fname)
-        self.height = height + 2
-        self.width = width + 2
+    def __init__(self, filename, validate_only=False):
+        self.filename = filename
+        self.element_grid = None
+        self.element_height = None
+        self.element_width = None
 
-    def load_sprites(self, game):
+        # height, width = self.validate_input(self.fname)
+        # self.height = height + 2
+        # self.width = width + 2
+
+    @property
+    def grid_width(self):
+        if self.element_width is not None:
+            return self.element_width + 2
+
+        return None
+
+    @property
+    def grid_height(self):
+        if self.element_height is not None:
+            return self.element_height + 2
+
+        return None
+
+    def load_level(self, game=None):
+        self.parse_input_file()
+        if game is not None:
+            self._load_sprites(game)
+
+    def _load_sprites(self, game):
+
         def init_sprite(i, j, char):
             obj = ELEMENTS[char]
             if obj:
@@ -27,30 +51,38 @@ class Level(object):
                 else:
                     obj(game, j, i)
 
-        with open(self.fname, 'r') as f:
-            for i, line in enumerate(f):
-                for j, char in enumerate(line):
-                    init_sprite(i+1, j+1, char)
+        for row, line in enumerate(self.element_grid):
+            for column, char in enumerate(line):
+                init_sprite(row + 1, column + 1, char)
 
-    def validate_input(self, fname):
+    def parse_input_file(self):
+
+        element_grid = []
+
         n_lines = 0
-        with open(fname, 'r') as f:
+        with open(self.filename, 'r') as f:
             for line in f:
+                stripped_line = line.strip()
                 if n_lines == 0:
-                    n_cols = len(line) 
+                    n_cols = len(stripped_line)
                 else:
-                    assert len(line) == n_cols, "Level file has inconsistent width"
+                    assert len(stripped_line) == n_cols, "Level file has inconsistent width"
                 n_lines += 1
 
-                for c in line:
-                    assert c in ELEMENTS.keys(), f"Level file: unrecognised token '{c}',\
-                                                  must be one of {ELEMENTS}"
+                unrecognised = [c for c in stripped_line if c not in ELEMENTS]
+                if unrecognised:
+                    raise RuntimeError(f"Invalid level file: Unrecognised tokens "
+                                       f"{unrecognised} on line {n_lines}, must be "
+                                       f"one of {ELEMENTS.keys()}")
+                element_grid.append(stripped_line)
 
-        n_cols -= 1 # ignore new line char
-        assert n_lines <= MAX_GRID_HEIGHT - 2 # account for wall
+        # Check valid grid size - 3 characters used per row/column for walls
+        assert n_lines <= MAX_GRID_HEIGHT - 2
         assert n_cols <= MAX_GRID_WIDTH - 2
 
-        return n_lines, n_cols
+        self.element_grid = element_grid
+        self.element_height, self.element_width = n_lines, n_cols
+
 
 if __name__ == "__main__":
     Level('levels/1.txt')

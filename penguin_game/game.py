@@ -20,13 +20,14 @@ from .settings import (
     WHITE,
     TITLE,
 )
-from .actors import Player, Block, Enemy
+
 from .entities import Wall
 
 LOGGER = logging.getLogger(__name__)
 
 image_dir = path.join(path.dirname(__file__), 'images')
 sound_dir = path.join(path.dirname(__file__), 'sounds')
+level_dir = path.join(path.dirname(__file__), 'levels')
 
 
 class State(Enum):
@@ -89,12 +90,12 @@ class Game:
         self.moving_blocks = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
 
-        level = Level('penguin_game/levels/1.txt')
-        level.load_sprites(self)
+        level = Level(path.join(level_dir, '1.txt'))
+        level.load_level(self)
 
         LOGGER.debug(f"No. enemies: {len(self.enemies)}, No. blocks: {len(self.blocks)}")
 
-        self.make_boundary_wall(level.height, level.width)
+        self.make_boundary_wall(level.grid_height, level.grid_width)
 
     def make_boundary_wall(self, height, width) -> None:
         """Create boundary for `Wall` Sprites around game grid.
