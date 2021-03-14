@@ -38,4 +38,5 @@ BLOCK_SPEED = 0.5
 
 # Enemy settings
 ENEMY_SPEED = 0.3
+ENEMY_IQ = 0.5 # zero to one
 ENEMY_KILL_POINTS = 200
