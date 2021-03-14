@@ -12,6 +12,7 @@ from .settings import (
     WIDTH,
     INFO_HEIGHT,
     FPS,
+    SHOW_GRID,
     TILE_SIZE,
     BG_COLOR,
     RED,
@@ -266,7 +267,8 @@ class Game:
         """Draw new frame to the screen.
         """
         self.screen.fill(BG_COLOR)
-        self.draw_grid()
+        if SHOW_GRID:
+            self.draw_grid()
         self.draw_info()
         self.all_sprites.draw(self.screen)
         pg.display.flip()

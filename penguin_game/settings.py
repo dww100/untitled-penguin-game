@@ -26,6 +26,9 @@ GRID_HEIGHT = 12
 WIDTH = GRID_WIDTH * TILE_SIZE
 HEIGHT = GRID_HEIGHT * TILE_SIZE
 
+# Show grid lines to help check alignment
+SHOW_GRID = False
+
 # Height of info bar
 INFO_HEIGHT = 32
 
