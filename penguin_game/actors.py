@@ -110,28 +110,26 @@ class Block(Actor):
         ]
 
         if not blocking:
+
             self.vel = BLOCK_SPEED * direction
+            self.game.blocks.remove(self)
+            self.game.moving_blocks.add(self)
+
         else:
             self.kill()
-
-    def check_for_squish(self):
-        """If Block collides with an enemy the enemy should die.
-        """
-        hits = pg.sprite.spritecollide(self, self.game.enemies, True)
-        if hits:
-            LOGGER.debug(hits)
 
     def update(self) -> None:
         """Update state each time round the game loop.
         Handles movement and collisions. If moving can squish enemies.
         """
-        if self.vel != Vector2(0, 0):
-            self.check_for_squish()
-        super().update()
 
         if self.vel.magnitude() == 0:
-            self.game.moving_blocks.remove(self)
-            self.game.blocks.add(self)
+
+            if self in self.game.moving_blocks:
+                self.game.moving_blocks.remove(self)
+                self.game.blocks.add(self)
+
+        super().update()
 
 
 class Player(Actor):
@@ -262,8 +260,6 @@ class Player(Actor):
         if hits:
 
             hits[0].respond_to_push(self.facing)
-            self.game.blocks.remove(hits)
-            self.game.moving_blocks.add(hits)
 
         hits = pg.sprite.spritecollide(
             self, self.game.walls, False, pg.sprite.collide_circle_ratio(0.75)
@@ -320,7 +316,7 @@ class Player(Actor):
 
 class Enemy(Actor):
     def __init__(
-        self, game, x, y, initial_direction: "pygame.math.Vector2" = Vector2(0, 1),
+        self, game, x, y, initial_direction: "pygame.math.Vector2" = Vector2(0, 1), point_value=ENEMY_KILL_POINTS,
     ):
 
         move_up_images = [
@@ -352,13 +348,14 @@ class Enemy(Actor):
         self.killed_by.append(game.moving_blocks)
         self.vel = self.facing * ENEMY_SPEED
         self.hunt = False
+        self.point_value = point_value
 
     def choose_new_direction(self, init_facing):
         turn_options = [self.facing * -1]
         if self.facing.x == 0:
-            turn_options += [Vector2(1,0), Vector2(-1,0)]
+            turn_options += [Vector2(1, 0), Vector2(-1, 0)]
         else:
-            turn_options += [Vector2(0,1), Vector2(0,-1)]
+            turn_options += [Vector2(0, 1), Vector2(0, -1)]
         random_turn = turn_options[np.random.randint(3)]
 
         # find direction to player
@@ -366,17 +363,18 @@ class Enemy(Actor):
         y = self.pos.y - self.game.player.pos.y
         if abs(x) > abs(y):
             if x > 0:
-                chase = Vector2(-1,0)
+                chase = Vector2(-1, 0)
             else:
-                chase = Vector2(1,0)
+                chase = Vector2(1, 0)
         else:
             if y > 0:
-                chase = Vector2(0,-1)
+                chase = Vector2(0, -1)
             else:
-                chase = Vector2(0,1)
+                chase = Vector2(0, 1)
 
         if chase == init_facing:
-            # Too dumb to know how to chase, TODO add path finding here
+            # Too dumb to know how to chase
+            # TODO: add path finding here
             return random_turn
 
         if np.random.random() < ENEMY_IQ or self.hunt:
@@ -390,7 +388,9 @@ class Enemy(Actor):
 
         super().update()
 
-        if not self.vel.magnitude(): # has collided with something
+        # Being stopped means the enemy has collided with something
+        # -  Therefore need to change direction
+        if not self.vel.magnitude():
             self.facing = self.choose_new_direction(init_facing)
             self.vel = self.facing * ENEMY_SPEED
 
@@ -401,5 +401,5 @@ class Enemy(Actor):
 
         if self.killed:
             play_sound(self.game.sounds["death_enemy"])
-            self.game.score += ENEMY_KILL_POINTS
+            self.game.score += self.point_value
             self.kill()
