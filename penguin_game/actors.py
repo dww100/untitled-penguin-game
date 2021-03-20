@@ -23,7 +23,7 @@ from .settings import (
     YELLOW,
     WHITE,
 )
-from .entities import Actor, Wall
+from .entities import Actor, Wall, ScoreMarker
 
 image_dir = path.join(path.dirname(__file__), "images")
 
@@ -402,4 +402,6 @@ class Enemy(Actor):
         if self.killed:
             play_sound(self.game.sounds["death_enemy"])
             self.game.score += self.point_value
+            score_marker = ScoreMarker(self.point_value, x=self.rect.x, y=self.rect.y)
+            self.game.all_sprites.add(score_marker)
             self.kill()
