@@ -109,6 +109,9 @@ class Actor(Sprite):
         self.rect.y += INFO_HEIGHT
         self.pos = Vector2(x, y) * TILE_SIZE
         self.pos.y += INFO_HEIGHT
+
+        self.snap_to_grid = True
+
         self.vel = Vector2(0, 0)
 
         self.original_pos = Vector2(self.pos)
@@ -209,6 +212,19 @@ class Actor(Sprite):
         """
         # Scale movement to ensure reliable frame rate.
         self.pos += self.vel * self.game.dt
+
+        if self.snap_to_grid:
+            if self.vel.x == 0:
+                delta = self.pos.x % TILE_SIZE
+                self.pos.x -= delta
+                if delta > TILE_SIZE / 2:
+                    self.pos.x += TILE_SIZE
+
+            if self.vel.y == 0:
+                delta = (self.pos.y - INFO_HEIGHT) % TILE_SIZE
+                self.pos.y -= delta
+                if delta > TILE_SIZE / 2:
+                    self.pos.y += TILE_SIZE
 
         self.rect.x = self.pos.x
         self.rect.y = self.pos.y
