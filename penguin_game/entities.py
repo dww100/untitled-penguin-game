@@ -8,7 +8,8 @@ import pygame as pg
 from pygame.sprite import Sprite
 from pygame.math import Vector2
 
-from .settings import TILE_SIZE, GREEN, YELLOW, INFO_HEIGHT
+from .settings import TILE_SIZE, GREEN, WHITE, BLACK, INFO_HEIGHT
+from .utils import play_sound
 
 LOGGER = logging.getLogger(__name__)
 
@@ -218,3 +219,50 @@ class Actor(Sprite):
             for stopper in self.stopped_by:
                 self.collide_and_stop(stopper, Axis.X)
                 self.collide_and_stop(stopper, Axis.Y)
+
+
+class ScoreMarker(pg.sprite.Sprite):
+    def __init__(self, score, x, y, color=WHITE, start_size=24, steps=5):
+
+        # Call the parent class (Sprite) constructor
+        pg.sprite.Sprite.__init__(self)
+        self.text_size = start_size
+        self.score = score
+
+        self.x = x
+        self.y = y
+
+        self.image = None
+        self.rect = None
+        self._blit_score()
+
+        self.current_step = 0
+        self.steps = steps
+        self.last_update = pg.time.get_ticks()
+        self.frame_rate = 200
+
+    def _blit_score(self):
+        self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
+        self.image.set_colorkey(BLACK)
+        font = pg.font.Font(pg.font.get_default_font(), int(self.text_size))
+        text_surface = font.render(str(self.score), 1, WHITE)
+        text_width = text_surface.get_width()
+        text_height = text_surface.get_height()
+        self.image.blit(text_surface, [TILE_SIZE/2 - text_width/2, TILE_SIZE/2 - text_height/2])
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+    def update(self) -> None:
+
+        now = pg.time.get_ticks()
+
+        if now - self.last_update > self.frame_rate:
+
+            if self.current_step == self.steps:
+                self.kill()
+            else:
+                self.last_update = now
+                self.current_step += 1
+                self.text_size = self.text_size / 2
+                self._blit_score()
