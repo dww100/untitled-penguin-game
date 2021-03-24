@@ -1,11 +1,12 @@
 from .settings import MAX_GRID_HEIGHT, MAX_GRID_WIDTH
-from .actors import Player, Block, Enemy
+from .actors import Player, Block, Enemy, Diamond
 
 ELEMENTS = {
         '.': None,
         '0': Block,
         '1': Player,
         '2': Enemy,
+        '3': Diamond,
         '\n': None
 }
 

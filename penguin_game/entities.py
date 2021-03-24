@@ -69,7 +69,7 @@ class Actor(Sprite):
         """
 
         if additional_groups is None:
-            self.groups = game.all_sprites
+            self.groups = [game.all_sprites]
         else:
             if isinstance(additional_groups, list):
                 self.groups = additional_groups + [game.all_sprites]

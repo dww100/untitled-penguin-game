@@ -88,6 +88,7 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.blocks = pg.sprite.Group()
+        self.diamonds = pg.sprite.Group()
         self.moving_blocks = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
 

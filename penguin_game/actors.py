@@ -72,10 +72,12 @@ class Block(Actor):
                     path.join(image_dir, "block_yellow64x64.png")
                 ).convert_alpha()
             ]
+            self.diamond = True
         else:
             static_images = [
                 pg.image.load(path.join(image_dir, "block64x64.png")).convert_alpha()
             ]
+            self.diamond = False
 
         super().__init__(
             game,
@@ -115,7 +117,7 @@ class Block(Actor):
             self.game.blocks.remove(self)
             self.game.moving_blocks.add(self)
 
-        else:
+        elif not self.diamond:
             self.kill()
 
     def update(self) -> None:
@@ -130,6 +132,28 @@ class Block(Actor):
                 self.game.blocks.add(self)
 
         super().update()
+
+
+class Diamond(Block):
+    def __init__(
+        self, game: "penguin_game.game.Game", x: int, y: int, diamond=False
+    ) -> None:
+        """Block Sprite.
+
+        Args:
+            game: Game that this Sprite is associated with (provides access to timing, etc).
+            x: Horizontal starting position in pixels.
+            y: Vertical starting position in pixels.
+            diamond: Is this a diamond?
+        """
+        super().__init__(
+            game,
+            x,
+            y,
+            diamond=True,
+        )
+
+        self.groups.append(game.diamonds)
 
 
 class Player(Actor):
