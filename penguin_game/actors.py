@@ -11,17 +11,12 @@ from pygame.math import Vector2
 
 from .settings import (
     TILE_SIZE,
-    INFO_HEIGHT,
     PLAYER_SPEED,
     DEATH_TIME,
     BLOCK_SPEED,
     ENEMY_SPEED,
     ENEMY_IQ,
     ENEMY_KILL_POINTS,
-    RED,
-    BLUE,
-    YELLOW,
-    WHITE,
 )
 from .entities import Actor, Wall, ScoreMarker
 
