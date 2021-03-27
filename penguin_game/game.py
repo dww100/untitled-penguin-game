@@ -20,6 +20,7 @@ from .settings import (
     WHITE,
     TITLE,
     TIME_LIMIT,
+    START_LIVES,
 )
 
 from .entities import Wall
@@ -70,6 +71,7 @@ class Game:
         self.moving_blocks = None
         self.enemies = None
         self.score = None
+        self.lives = None
         self.start_ticks = None
         self.timer = None
 
@@ -86,10 +88,16 @@ class Game:
         self.sounds['death_enemy'][0].set_volume(0.6)
         self.sounds['electric'][0].set_volume(0.2)
 
-    def setup_play(self):
+    def setup_play(self, reset=False):
         """Initialize variables and setup for new game.
         """
-        self.score = 0
+        if reset:
+            for sprite in self.all_sprites:
+                sprite.kill()
+        else:
+            self.score = 0
+            self.lives = START_LIVES
+
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.blocks = pg.sprite.Group()
@@ -99,7 +107,6 @@ class Game:
 
         level = Level(path.join(level_dir, '1.txt'))
         level.load_level(self)
-
         LOGGER.debug(f"No. enemies: {len(self.enemies)}, No. blocks: {len(self.blocks)}")
 
         self.make_boundary_wall(level.grid_height, level.grid_width)
@@ -224,10 +231,10 @@ class Game:
             self.draw()
 
             if self.player.death_timer == 0:
-                if self.player.lives == 0:
+                if self.lives == 0:
                     self.state = State.GAME_OVER
                 else:
-                    self.player.reset()
+                    self.setup_play(reset=True)
 
     def events(self) -> None:
         """Handle events - key presses etc.
@@ -265,7 +272,7 @@ class Game:
 
         icon_size = INFO_HEIGHT - 6
 
-        for i in range(self.player.lives):
+        for i in range(self.lives):
             life_icon = pg.image.load(
                 path.join(image_dir, f"pengo_left.png")
             ).convert_alpha()

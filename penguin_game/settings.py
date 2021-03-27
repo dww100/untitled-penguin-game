@@ -33,8 +33,9 @@ SHOW_GRID = False
 INFO_HEIGHT = 32
 
 # Player settings
+START_LIVES = 2
 PLAYER_SPEED = 0.5
-DEATH_TIME = 30
+DEATH_TIME = 60
 
 # Block settings
 BLOCK_SPEED = 0.5

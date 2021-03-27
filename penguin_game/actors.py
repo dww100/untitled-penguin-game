@@ -198,7 +198,6 @@ class Player(Actor):
         self.killed_by.append(game.enemies)
         self.vel = Vector2(0, 0)
         self.last_pos = Vector2(x, y)
-        self.lives = 2
         self.frozen = False
         self.death_timer = None
 
@@ -257,13 +256,6 @@ class Player(Actor):
         )]:
             play_sound(self.game.sounds["electric"])
 
-    def reset(self):
-        self.image = self.move_down_images[0]
-        self.facing = Vector2(0, 1)
-        self.pos = self.original_pos
-        self.death_timer = None
-        self.frozen = False
-
     def death_update(self) -> None:
         """Update the death times and image shown after player dies.
         """
@@ -294,7 +286,7 @@ class Player(Actor):
         # self.killed set during super.update()
         elif self.killed:
             play_sound(self.game.sounds["death_self"])
-            self.lives -= 1
+            self.game.lives -= 1
             self.frozen = True
             self.death_timer = DEATH_TIME
         else:
