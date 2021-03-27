@@ -39,6 +39,11 @@ DEATH_TIME = 30
 # Block settings
 BLOCK_SPEED = 0.5
 
+# Game settings
+
+# Time limit for level completion in seconds
+TIME_LIMIT = 120
+
 # Enemy settings
 ENEMY_SPEED = 0.3
 ENEMY_IQ = 0.5  # zero to one

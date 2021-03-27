@@ -16,10 +16,10 @@ from .settings import (
     TILE_SIZE,
     BG_COLOR,
     RED,
-    YELLOW,
     LIGHT_GREY,
     WHITE,
     TITLE,
+    TIME_LIMIT,
 )
 
 from .entities import Wall
@@ -29,6 +29,8 @@ LOGGER = logging.getLogger(__name__)
 image_dir = path.join(path.dirname(__file__), 'images')
 sound_dir = path.join(path.dirname(__file__), 'sounds')
 level_dir = path.join(path.dirname(__file__), 'levels')
+
+TIMER = pg.USEREVENT + 1
 
 
 class State(Enum):
@@ -64,9 +66,12 @@ class Game:
         self.walls = None
         self.player = None
         self.blocks = None
+        self.diamonds = None
         self.moving_blocks = None
         self.enemies = None
         self.score = None
+        self.start_ticks = None
+        self.timer = None
 
         self.state = State.MENU
 
@@ -98,6 +103,9 @@ class Game:
         LOGGER.debug(f"No. enemies: {len(self.enemies)}, No. blocks: {len(self.blocks)}")
 
         self.make_boundary_wall(level.grid_height, level.grid_width)
+
+        self.timer = TIME_LIMIT
+        pg.time.set_timer(TIMER, 1000)
 
     def make_boundary_wall(self, height, width) -> None:
         """Create boundary for `Wall` Sprites around game grid.
@@ -226,6 +234,11 @@ class Game:
         """
 
         for event in pg.event.get():
+            if event.type == TIMER:
+                self.timer -= 1
+                if self.timer == 0:
+                    LOGGER.debug("Time ran out")
+
             if event.type == pg.QUIT:
                 self.quit()
             if event.type == pg.KEYDOWN:
@@ -263,6 +276,7 @@ class Game:
             self.screen.blit(life_icon, life_rect)
 
         self.draw_text(f"Score: {self.score}", size=24, color=WHITE, x=WIDTH//2, y=6)
+        self.draw_text(f"Time: {self.timer}", size=24, color=WHITE, x=WIDTH//2 + 150, y=6)
 
     def draw(self) -> None:
         """Draw new frame to the screen.
