@@ -49,3 +49,6 @@ TIME_LIMIT = 120
 ENEMY_SPEED = 0.3
 ENEMY_IQ = 0.5  # zero to one
 ENEMY_KILL_POINTS = 200
+
+# Egg settings
+EGG_BREAK_POINTS = 400

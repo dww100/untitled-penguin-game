@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging
 
 from os import path
-from typing import Union
+from typing import Union, List, Optional
 from .utils import play_sound
 import numpy as np
 
@@ -17,6 +17,7 @@ from .settings import (
     ENEMY_SPEED,
     ENEMY_IQ,
     ENEMY_KILL_POINTS,
+    EGG_BREAK_POINTS,
 )
 from .entities import Actor, Wall, ScoreMarker
 
@@ -50,7 +51,7 @@ def is_actor_neighbour_in_direction(
 
 class Block(Actor):
     def __init__(
-        self, game: "penguin_game.game.Game", x: int, y: int, diamond=False
+        self, game: "penguin_game.game.Game", x: int, y: int, images: Optional[List[pg.Surface]] = None
     ) -> None:
         """Block Sprite.
 
@@ -58,21 +59,15 @@ class Block(Actor):
             game: Game that this Sprite is associated with (provides access to timing, etc).
             x: Horizontal starting position in pixels.
             y: Vertical starting position in pixels.
-            diamond: Is this a diamond?
+            images: Is this a diamond?
         """
 
-        if diamond:
-            static_images = [
-                pg.image.load(
-                    path.join(image_dir, "block_yellow64x64.png")
-                ).convert_alpha()
-            ]
-            self.diamond = True
-        else:
+        if images is None:
             static_images = [
                 pg.image.load(path.join(image_dir, "block64x64.png")).convert_alpha()
             ]
-            self.diamond = False
+        else:
+            static_images = images
 
         super().__init__(
             game,
@@ -112,8 +107,11 @@ class Block(Actor):
             self.game.blocks.remove(self)
             self.game.moving_blocks.add(self)
 
-        elif not self.diamond:
-            self.kill()
+        else:
+            self.blocked_push_response()
+
+    def blocked_push_response(self) -> None:
+        self.kill()
 
     def update(self) -> None:
         """Update state each time round the game loop.
@@ -133,6 +131,40 @@ class Diamond(Block):
     def __init__(
         self, game: "penguin_game.game.Game", x: int, y: int, diamond=False
     ) -> None:
+        """Diamond Sprite - unbreakable block.
+
+        TODO: Make lining up three give a bonus.
+
+        Args:
+            game: Game that this Sprite is associated with (provides access to timing, etc).
+            x: Horizontal starting position in pixels.
+            y: Vertical starting position in pixels.
+            diamond: Is this a diamond?
+        """
+
+        static_images = [
+            pg.image.load(
+                path.join(image_dir, "block_yellow64x64.png")
+            ).convert_alpha()
+        ]
+
+        super().__init__(
+            game,
+            x,
+            y,
+            images=static_images,
+        )
+
+        self.groups.append(game.diamonds)
+
+    def blocked_push_response(self) -> None:
+        pass
+
+
+class EggBlock(Block):
+    def __init__(
+            self, game: "penguin_game.game.Game", x: int, y: int, diamond=False
+    ) -> None:
         """Block Sprite.
 
         Args:
@@ -145,10 +177,14 @@ class Diamond(Block):
             game,
             x,
             y,
-            diamond=True,
         )
+        self.point_value = EGG_BREAK_POINTS
 
-        self.groups.append(game.diamonds)
+    def blocked_push_response(self) -> None:
+        self.game.score += self.point_value
+        score_marker = ScoreMarker(self.point_value, x=self.rect.x, y=self.rect.y)
+        self.game.all_sprites.add(score_marker)
+        self.kill()
 
 
 class Player(Actor):
