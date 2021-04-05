@@ -105,7 +105,8 @@ class Game:
         self.moving_blocks = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
 
-        level = Level(path.join(level_dir, '1.txt'))
+        # level = Level(path.join(level_dir, '1.txt'))
+        level = Level(path.join(level_dir, 'c64_level1.txt'))
         level.load_level(self)
         LOGGER.debug(f"No. enemies: {len(self.enemies)}, No. blocks: {len(self.blocks)}")
 

@@ -16,11 +16,11 @@ FPS = 60
 
 TILE_SIZE = 64
 # Dimensions of the game space in tiles
-MAX_GRID_WIDTH = 12
-MAX_GRID_HEIGHT = 12
+MAX_GRID_WIDTH = 20
+MAX_GRID_HEIGHT = 20
 
 # Dimensions of the game space in tiles
-GRID_WIDTH = 12
+GRID_WIDTH = 17
 GRID_HEIGHT = 12
 # Dimensions of the game space in pixels
 WIDTH = GRID_WIDTH * TILE_SIZE
