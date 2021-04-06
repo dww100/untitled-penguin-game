@@ -264,6 +264,7 @@ class ScoreMarker(pg.sprite.Sprite):
         # Call the parent class (Sprite) constructor
         pg.sprite.Sprite.__init__(self)
         self.text_size = start_size
+        self.color = color
         self.score = score
 
         self.x = x
@@ -282,7 +283,7 @@ class ScoreMarker(pg.sprite.Sprite):
         self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
         self.image.set_colorkey(BLACK)
         font = pg.font.Font(pg.font.get_default_font(), int(self.text_size))
-        text_surface = font.render(str(self.score), 1, WHITE)
+        text_surface = font.render(str(self.score), 1, self.color)
         text_width = text_surface.get_width()
         text_height = text_surface.get_height()
         self.image.blit(text_surface, [TILE_SIZE/2 - text_width/2, TILE_SIZE/2 - text_height/2])

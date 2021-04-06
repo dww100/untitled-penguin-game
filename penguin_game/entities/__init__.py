@@ -1,2 +1,2 @@
-from .entities import ENTITIES, Wall
+from .entities import ENTITIES, Wall, ScoreMarker
 from .actors import *
