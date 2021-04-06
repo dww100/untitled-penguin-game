@@ -309,6 +309,12 @@ class Player(Actor):
         frame = int(self.death_timer / gap) - 1
         self.image = self.death_images[frame]
 
+    def initiate_death_sequence(self):
+        play_sound(self.game.sounds["death_self"])
+        self.game.lives -= 1
+        self.frozen = True
+        self.death_timer = DEATH_TIME
+
     def update(self) -> None:
         """Update state each time round the game loop.
         Checks for user input, then handles movement and wall collisions.
@@ -328,10 +334,7 @@ class Player(Actor):
 
         # self.killed set during super.update()
         elif self.killed:
-            play_sound(self.game.sounds["death_self"])
-            self.game.lives -= 1
-            self.frozen = True
-            self.death_timer = DEATH_TIME
+            self.initiate_death_sequence()
         else:
             self.update_animation(direction_change=change_direction)
 

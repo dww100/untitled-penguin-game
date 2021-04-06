@@ -237,6 +237,11 @@ class Game:
                 else:
                     self.setup_play(reset=True)
 
+            if self.timer == 0:
+                LOGGER.debug("Time out")
+                self.player.initiate_death_sequence()
+                self.timer = -1
+
             if len(self.enemies) == 0:
                 LOGGER.debug("All dead")
 
@@ -247,8 +252,6 @@ class Game:
         for event in pg.event.get():
             if event.type == TIMER:
                 self.timer -= 1
-                if self.timer == 0:
-                    LOGGER.debug("Time ran out")
 
             if event.type == pg.QUIT:
                 self.quit()
@@ -286,8 +289,11 @@ class Game:
             life_rect.y = 3
             self.screen.blit(life_icon, life_rect)
 
-        self.draw_text(f"Score: {self.score}", size=24, color=WHITE, x=WIDTH//2, y=6)
-        self.draw_text(f"Time: {self.timer}", size=24, color=WHITE, x=WIDTH//2 + 150, y=6)
+        self.draw_text("Score:", size=24, color=WHITE, x=WIDTH//2 - 50, y=6)
+        self.draw_text(f"{self.score}", size=24, color=WHITE, x=WIDTH//2 + 50, y=6)
+
+        self.draw_text("Time:", size=24, color=WHITE, x=WIDTH//2 + 150, y=6)
+        self.draw_text(f"{self.timer}", size=24, color=WHITE, x=WIDTH // 2 + 210, y=6)
 
     def draw(self) -> None:
         """Draw new frame to the screen.
