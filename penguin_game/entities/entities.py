@@ -125,11 +125,8 @@ class Actor(BaseEntity):
             self.image = move_down_images[0]
 
         self.rect = self.image.get_rect()
-        self.rect.x = x * TILE_SIZE
-        self.rect.y = y * TILE_SIZE
-        self.rect.y += INFO_HEIGHT
-        self.pos = Vector2(x, y) * TILE_SIZE
-        self.pos.y += INFO_HEIGHT
+        self.pos = Vector2(0, 0)
+        self.set_position(x, y)
 
         self.snap_to_grid = True
 
@@ -141,6 +138,13 @@ class Actor(BaseEntity):
         self.stopped_by = [self.game.walls]
         self.killed_by = []
         self.killed = False
+
+    def set_position(self, x, y):
+        self.rect.x = x * TILE_SIZE
+        self.rect.y = y * TILE_SIZE
+        self.rect.y += INFO_HEIGHT
+        self.pos = Vector2(x, y) * TILE_SIZE
+        self.pos.y += INFO_HEIGHT
 
     def collide_and_stop(
         self, check_group: pg.sprite.Group, direction: Axis = Axis.X

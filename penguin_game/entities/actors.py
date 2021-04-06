@@ -385,6 +385,8 @@ class Enemy(Actor):
         self.hunt = False
 
         self.lives = lives
+        self.starting_x = x
+        self.starting_y = y
 
     def choose_new_direction(self, init_facing):
         turn_options = [self.facing * -1]
@@ -436,8 +438,15 @@ class Enemy(Actor):
             self.update_animation()
 
         if self.killed:
+
             play_sound(self.game.sounds["death_enemy"])
+
             self.game.score += self.point_value
             score_marker = ScoreMarker(self.point_value, x=self.rect.x, y=self.rect.y)
+
             self.game.all_sprites.add(score_marker)
-            self.kill()
+            if self.lives == 0:
+                self.kill()
+            else:
+                self.lives -= 1
+                self.set_position(self.starting_x, self.starting_y)
