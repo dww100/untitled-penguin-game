@@ -38,7 +38,7 @@ PLAYER_SPEED = 0.5
 DEATH_TIME = 60
 
 # Block settings
-BLOCK_SPEED = 0.5
+BLOCK_SPEED = 1
 
 # Game settings
 

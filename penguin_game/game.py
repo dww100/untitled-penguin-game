@@ -237,6 +237,9 @@ class Game:
                 else:
                     self.setup_play(reset=True)
 
+            if len(self.enemies) == 0:
+                LOGGER.debug("All dead")
+
     def events(self) -> None:
         """Handle events - key presses etc.
         """
