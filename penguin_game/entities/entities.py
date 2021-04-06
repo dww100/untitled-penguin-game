@@ -86,7 +86,7 @@ class Actor(BaseEntity):
             x: Horizontal starting position in pixels.
             y: Vertical starting position in pixels.
             additional_groups: Sprite groups other than `game.all_sprites` to be associated with.
-            colour: Colour tos use to fill place holder rect.
+            colour: Colour to use to fill place holder rect.
         """
 
         if additional_groups is None:
