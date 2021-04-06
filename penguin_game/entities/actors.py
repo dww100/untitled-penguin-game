@@ -3,13 +3,13 @@ import logging
 
 from os import path
 from typing import Union, List, Optional
-from .utils import play_sound
+from penguin_game.utils import play_sound
 import numpy as np
 
 import pygame as pg
 from pygame.math import Vector2
 
-from .settings import (
+from penguin_game.settings import (
     TILE_SIZE,
     PLAYER_SPEED,
     DEATH_TIME,
@@ -21,7 +21,7 @@ from .settings import (
 )
 from .entities import Actor, Wall, ScoreMarker
 
-image_dir = path.join(path.dirname(__file__), "images")
+image_dir = path.join(path.dirname(__file__), "../images")
 
 LOGGER = logging.getLogger(__name__)
 
@@ -50,6 +50,9 @@ def is_actor_neighbour_in_direction(
 
 
 class Block(Actor):
+    id = '2'
+    text_name = 'Block'
+
     def __init__(
         self, game: "penguin_game.game.Game", x: int, y: int, images: Optional[List[pg.Surface]] = None
     ) -> None:
@@ -128,6 +131,9 @@ class Block(Actor):
 
 
 class Diamond(Block):
+    id = '3'
+    text_name = 'Diamond'
+
     def __init__(
         self, game: "penguin_game.game.Game", x: int, y: int, diamond=False
     ) -> None:
@@ -162,6 +168,9 @@ class Diamond(Block):
 
 
 class EggBlock(Block):
+    id = '4'
+    text_name = 'Egg'
+
     def __init__(
             self, game: "penguin_game.game.Game", x: int, y: int, diamond=False
     ) -> None:
@@ -188,6 +197,9 @@ class EggBlock(Block):
 
 
 class Player(Actor):
+    id = '1'
+    text_name = 'Player'
+
     def __init__(self, game: "penguin_game.game.Game", x: int, y: int,) -> None:
         """Player Sprite.
 
@@ -325,6 +337,9 @@ class Player(Actor):
 
 
 class Enemy(Actor):
+    id = '5'
+    text_name = 'Enemy'
+
     def __init__(
         self, game, x, y, initial_direction: "pygame.math.Vector2" = Vector2(0, 1), point_value=ENEMY_KILL_POINTS,
     ):

@@ -1,14 +1,21 @@
 from .settings import MAX_GRID_HEIGHT, MAX_GRID_WIDTH
-from .actors import Player, Block, Enemy, Diamond
+#from .actors import Player, Block, Enemy, Diamond
+from .entities import ENTITIES
+
+# ELEMENTS = {
+#         '.': None,
+#         '0': Block,
+#         '1': Player,
+#         '2': Enemy,
+#         '3': Diamond,
+#         '\n': None
+# }
 
 ELEMENTS = {
         '.': None,
-        '0': Block,
-        '1': Player,
-        '2': Enemy,
-        '3': Diamond,
         '\n': None
 }
+ELEMENTS.update(ENTITIES)
 
 
 class Level(object):
@@ -47,7 +54,7 @@ class Level(object):
         def init_sprite(i, j, char):
             obj = ELEMENTS[char]
             if obj:
-                if obj is Player:
+                if obj.text_name == 'Player':
                     game.player = obj(game, j, i)
                 else:
                     obj(game, j, i)

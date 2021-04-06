@@ -8,10 +8,12 @@ import pygame as pg
 from pygame.sprite import Sprite
 from pygame.math import Vector2
 
-from .settings import TILE_SIZE, GREEN, WHITE, BLACK, INFO_HEIGHT
-from .utils import play_sound
+from penguin_game.settings import TILE_SIZE, GREEN, WHITE, BLACK, INFO_HEIGHT
+from penguin_game.utils import play_sound
 
 LOGGER = logging.getLogger(__name__)
+
+ENTITIES = {}
 
 
 class Axis(Enum):
@@ -19,7 +21,26 @@ class Axis(Enum):
     Y = 1
 
 
-class Wall(Sprite):
+class BaseEntity(Sprite):
+    id = None
+    text_name = ''
+
+    def __init_subclass__(cls, *args, **kwargs):
+        """
+        Catch any new scoring functions (all entities must inherit
+        from this base class) and add them to the dict of entities.
+        """
+        super().__init_subclass__(**kwargs)
+
+        if cls.id is not None:
+            # Register new entity
+            ENTITIES[cls.id] = cls
+
+
+class Wall(BaseEntity):
+    id = '0'
+    text_name = 'Wall'
+
     def __init__(self, game: "penguin_game.game.Game", x: int, y: int) -> None:
         """Sprite class to describe bounding wall elements.
 
@@ -44,7 +65,7 @@ class Wall(Sprite):
         play_sound(self.game.sounds['electric'])
 
 
-class Actor(Sprite):
+class Actor(BaseEntity):
     def __init__(
         self,
         game: "penguin_game.game.Game",
