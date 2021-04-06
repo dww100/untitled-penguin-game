@@ -293,7 +293,11 @@ class Game:
         self.draw_text(f"{self.score}", size=24, color=WHITE, x=WIDTH//2 + 50, y=6)
 
         self.draw_text("Time:", size=24, color=WHITE, x=WIDTH//2 + 150, y=6)
-        self.draw_text(f"{self.timer}", size=24, color=WHITE, x=WIDTH // 2 + 210, y=6)
+        if self.timer > 0:
+            time = self.timer
+        else:
+            time = 0
+        self.draw_text(f"{time}", size=24, color=WHITE, x=WIDTH // 2 + 210, y=6)
 
     def draw(self) -> None:
         """Draw new frame to the screen.
