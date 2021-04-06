@@ -102,6 +102,8 @@ class Actor(BaseEntity):
 
         self.facing = initial_direction
 
+        self.frozen = False
+
         self.animation_frame = 0
         self.last_update = 0
         self.update_freq = 5

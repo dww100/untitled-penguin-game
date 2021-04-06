@@ -242,7 +242,6 @@ class Player(Actor):
         self.killed_by.append(game.enemies)
         self.vel = Vector2(0, 0)
         self.last_pos = Vector2(x, y)
-        self.frozen = False
         self.death_timer = None
 
         self.death_images = []
@@ -305,8 +304,8 @@ class Player(Actor):
         """
         self.death_timer -= 1
 
-        gap = DEATH_TIME // 3
-        # TODO: Replace with a good animation
+        gap = DEATH_TIME // len(self.death_images)
+
         frame = int(self.death_timer / gap) - 1
         self.image = self.death_images[frame]
 
