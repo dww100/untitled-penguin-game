@@ -50,11 +50,15 @@ def is_actor_neighbour_in_direction(
 
 
 class Block(Actor):
-    id = '2'
-    text_name = 'Block'
+    id = "2"
+    text_name = "Block"
 
     def __init__(
-        self, game: "penguin_game.game.Game", x: int, y: int, images: Optional[List[pg.Surface]] = None
+        self,
+        game: "penguin_game.game.Game",
+        x: int,
+        y: int,
+        images: Optional[List[pg.Surface]] = None,
     ) -> None:
         """Block Sprite.
 
@@ -131,8 +135,8 @@ class Block(Actor):
 
 
 class Diamond(Block):
-    id = '3'
-    text_name = 'Diamond'
+    id = "3"
+    text_name = "Diamond"
 
     def __init__(
         self, game: "penguin_game.game.Game", x: int, y: int, diamond=False
@@ -149,16 +153,11 @@ class Diamond(Block):
         """
 
         static_images = [
-            pg.image.load(
-                path.join(image_dir, "block_yellow64x64.png")
-            ).convert_alpha()
+            pg.image.load(path.join(image_dir, "block_yellow64x64.png")).convert_alpha()
         ]
 
         super().__init__(
-            game,
-            x,
-            y,
-            images=static_images,
+            game, x, y, images=static_images,
         )
 
         self.groups.append(game.diamonds)
@@ -168,11 +167,11 @@ class Diamond(Block):
 
 
 class EggBlock(Block):
-    id = '4'
-    text_name = 'Egg'
+    id = "4"
+    text_name = "Egg"
 
     def __init__(
-            self, game: "penguin_game.game.Game", x: int, y: int, diamond=False
+        self, game: "penguin_game.game.Game", x: int, y: int, diamond=False
     ) -> None:
         """Block Sprite.
 
@@ -183,9 +182,7 @@ class EggBlock(Block):
             diamond: Is this a diamond?
         """
         super().__init__(
-            game,
-            x,
-            y,
+            game, x, y,
         )
         self.point_value = EGG_BREAK_POINTS
 
@@ -197,8 +194,8 @@ class EggBlock(Block):
 
 
 class Player(Actor):
-    id = '1'
-    text_name = 'Player'
+    id = "1"
+    text_name = "Player"
 
     def __init__(self, game: "penguin_game.game.Game", x: int, y: int,) -> None:
         """Player Sprite.
@@ -211,20 +208,24 @@ class Player(Actor):
 
         move_up_images = []
         for frame_no in range(1, 3):
-            move_up_images.append(pg.image.load(
+            move_up_images.append(
+                pg.image.load(
                     path.join(image_dir, f"pengo_back{frame_no}.png")
-                ).convert_alpha())
+                ).convert_alpha()
+            )
         move_down_images = []
         for frame_no in range(1, 3):
-            move_down_images.append(pg.image.load(
+            move_down_images.append(
+                pg.image.load(
                     path.join(image_dir, f"pengo_front{frame_no}.png")
-                ).convert_alpha())
-        move_left_images = [pg.image.load(
-                    path.join(image_dir, f"pengo_left.png")
-                ).convert_alpha()]
-        move_right_images = [pg.image.load(
-                    path.join(image_dir, f"pengo_right.png")
-                ).convert_alpha()]
+                ).convert_alpha()
+            )
+        move_left_images = [
+            pg.image.load(path.join(image_dir, f"pengo_left.png")).convert_alpha()
+        ]
+        move_right_images = [
+            pg.image.load(path.join(image_dir, f"pengo_right.png")).convert_alpha()
+        ]
 
         super().__init__(
             game,
@@ -246,9 +247,11 @@ class Player(Actor):
 
         self.death_images = []
         for frame_no in range(1, 4):
-            self.death_images.append(pg.image.load(
+            self.death_images.append(
+                pg.image.load(
                     path.join(image_dir, f"pengo_dead{frame_no}.png")
-                ).convert_alpha())
+                ).convert_alpha()
+            )
 
     def get_keys(self) -> None:
         """Handle keyboard input.
@@ -282,9 +285,9 @@ class Player(Actor):
         hits = pg.sprite.spritecollide(
             self, self.game.blocks, False, pg.sprite.collide_circle_ratio(1.2)
         )
-        hits = [h for h in hits if is_actor_neighbour_in_direction(
-            self, h, self.facing
-        )]
+        hits = [
+            h for h in hits if is_actor_neighbour_in_direction(self, h, self.facing)
+        ]
 
         if hits:
 
@@ -294,9 +297,7 @@ class Player(Actor):
             self, self.game.walls, False, pg.sprite.collide_circle_ratio(0.75)
         )
 
-        if [h for h in hits if is_actor_neighbour_in_direction(
-            self, h, self.facing
-        )]:
+        if [h for h in hits if is_actor_neighbour_in_direction(self, h, self.facing)]:
             play_sound(self.game.sounds["electric"])
 
     def death_update(self) -> None:
@@ -337,11 +338,17 @@ class Player(Actor):
 
 
 class Enemy(Actor):
-    id = '5'
-    text_name = 'Enemy'
+    id = "5"
+    text_name = "Enemy"
 
     def __init__(
-        self, game, x, y, initial_direction: "pygame.math.Vector2" = Vector2(0, 1), point_value=ENEMY_KILL_POINTS,
+        self,
+        game,
+        x,
+        y,
+        initial_direction: "pygame.math.Vector2" = Vector2(0, 1),
+        point_value: int = ENEMY_KILL_POINTS,
+        lives: int = 2,
     ):
 
         move_up_images = [
@@ -371,9 +378,13 @@ class Enemy(Actor):
 
         self.stopped_by.append(game.blocks)
         self.killed_by.append(game.moving_blocks)
+
+        self.point_value = point_value
+
         self.vel = self.facing * ENEMY_SPEED
         self.hunt = False
-        self.point_value = point_value
+
+        self.lives = lives
 
     def choose_new_direction(self, init_facing):
         turn_options = [self.facing * -1]
