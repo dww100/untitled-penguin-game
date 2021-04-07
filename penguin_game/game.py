@@ -302,6 +302,9 @@ class Game:
                             self.kill_bonus = 0
                             state_text = f"Too slow - No kill bonus"
 
+                if self.timer == 0:
+                    self.game_state = InGameState.COMPLETE
+
             self.draw(state_text=state_text)
 
     def events(self) -> None:
