@@ -176,7 +176,6 @@ class Diamond(Block):
 
         if self.stopped:
 
-            LOGGER.debug("STOPPED")
             # Check for aligned diamonds
             n_diamonds = len(self.game.diamonds)
             hits = [
@@ -192,7 +191,6 @@ class Diamond(Block):
                 for s in self.game.diamonds
             ]
 
-            LOGGER.debug(f"HITS: {hits}")
             if any(hits):
                 self.game.score += DIAMOND_LINEUP_BONUS
                 score_marker = ScoreMarker(
