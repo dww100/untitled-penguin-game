@@ -21,6 +21,7 @@ from .settings import (
     TITLE,
     TIME_LIMIT,
     START_LIVES,
+    ENEMY_CLEARANCE_BONUS
 )
 
 from .entities import Wall
@@ -38,6 +39,13 @@ class State(Enum):
     MENU = 1
     PLAY = 2
     GAME_OVER = 3
+
+
+class InGameState(Enum):
+    READY = 1
+    RUNNING = 2
+    COMPLETE = 3
+    DIED = 4
 
 
 class Game:
@@ -74,8 +82,14 @@ class Game:
         self.lives = None
         self.start_ticks = None
         self.timer = None
+        self.display_timer = None
+        self.target_no_kills = None
+
+        self.kill_bonus = None
+        self.diamond_bonus = None
 
         self.state = State.MENU
+        self.game_state = None
 
         self.sounds = {
             'swoosh': (pg.mixer.Sound(path.join(sound_dir, 'swoosh.wav')), 0),
@@ -91,12 +105,14 @@ class Game:
     def setup_play(self, reset=False):
         """Initialize variables and setup for new game.
         """
+
         if reset:
             for sprite in self.all_sprites:
                 sprite.kill()
         else:
             self.score = 0
             self.lives = START_LIVES
+            self.game_state = InGameState.READY
 
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
@@ -114,6 +130,10 @@ class Game:
 
         self.timer = TIME_LIMIT
         pg.time.set_timer(TIMER, 1000)
+
+        self.target_no_kills = 5
+        self.kill_bonus = None
+        self.diamond_bonus = None
 
     def make_boundary_wall(self, height, width) -> None:
         """Create boundary for `Wall` Sprites around game grid.
@@ -224,26 +244,65 @@ class Game:
         pg.mixer.music.play(-1, fade_ms=1000)
 
         while self.state == State.PLAY:
+
             # Using clock.tick each loop ensures framerate is limited to target FPS
             self.dt = self.clock.tick(FPS)
 
             self.events()
-            self.update()
-            self.draw()
 
-            if self.player.death_timer == 0:
-                if self.lives == 0:
-                    self.state = State.GAME_OVER
-                else:
+            if self.game_state == InGameState.READY:
+
+                state_text = "READY!"
+
+                if self.display_timer is None:
+                    self.display_timer = 1
+
+                elif self.display_timer == 0:
+                    self.display_timer = None
+                    self.game_state = InGameState.RUNNING
+
+            elif self.game_state == InGameState.COMPLETE:
+
+                state_text = "You survived!"
+
+                if self.display_timer is None:
+                    self.display_timer = 1
+
+                elif self.display_timer == 0:
+                    self.display_timer = None
                     self.setup_play(reset=True)
+                    self.game_state = InGameState.READY
 
-            if self.timer == 0:
-                LOGGER.debug("Time out")
-                self.player.initiate_death_sequence()
-                self.timer = -1
+            else:
 
-            if len(self.enemies) == 0:
-                LOGGER.debug("All dead")
+                self.update()
+
+                if self.display_timer is None:
+                    state_text = None
+                elif self.display_timer == self.timer:
+                    self.display_timer = None
+
+                if self.player.death_timer == 0:
+                    if self.lives == 0:
+                        self.state = State.GAME_OVER
+                    else:
+                        self.setup_play(reset=True)
+                        self.game_state = InGameState.READY
+
+                if self.kill_bonus is None:
+                    if sum([e.deaths for e in self.enemies]) == self.target_no_kills:
+
+                        self.display_timer = self.timer - 2
+
+                        half_time = TIME_LIMIT // 2
+                        if self.timer >= half_time:
+                            self.kill_bonus = (self.timer - half_time) // 10 * ENEMY_CLEARANCE_BONUS
+                            state_text = f"Kill bonus: {self.kill_bonus}"
+                        else:
+                            self.kill_bonus = 0
+                            state_text = f"Too slow - No kill bonus"
+
+            self.draw(state_text=state_text)
 
     def events(self) -> None:
         """Handle events - key presses etc.
@@ -251,7 +310,10 @@ class Game:
 
         for event in pg.event.get():
             if event.type == TIMER:
-                self.timer -= 1
+                if self.game_state == InGameState.RUNNING:
+                    self.timer -= 1
+                else:
+                    self.display_timer -= 1
 
             if event.type == pg.QUIT:
                 self.quit()
@@ -299,7 +361,7 @@ class Game:
             time = 0
         self.draw_text(f"{time}", size=24, color=WHITE, x=WIDTH // 2 + 210, y=6)
 
-    def draw(self) -> None:
+    def draw(self, state_text: Optional[str] = None) -> None:
         """Draw new frame to the screen.
         """
         self.screen.fill(BG_COLOR)
@@ -307,4 +369,6 @@ class Game:
             self.draw_grid()
         self.draw_info()
         self.all_sprites.draw(self.screen)
+        if state_text is not None:
+            self.draw_text(state_text, 75, WHITE, WIDTH // 2, HEIGHT // 2)
         pg.display.flip()

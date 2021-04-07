@@ -350,7 +350,6 @@ class Enemy(Actor):
         y,
         initial_direction: "pygame.math.Vector2" = Vector2(0, 1),
         point_value: int = ENEMY_KILL_POINTS,
-        lives: int = 2,
     ):
 
         move_up_images = [
@@ -386,7 +385,7 @@ class Enemy(Actor):
         self.vel = self.facing * ENEMY_SPEED
         self.hunt = False
 
-        self.lives = lives
+        self.deaths = 0
         self.starting_x = x
         self.starting_y = y
 
@@ -447,8 +446,6 @@ class Enemy(Actor):
             score_marker = ScoreMarker(self.point_value, x=self.rect.x, y=self.rect.y)
 
             self.game.all_sprites.add(score_marker)
-            if self.lives == 0:
-                self.kill()
-            else:
-                self.lives -= 1
-                self.set_position(self.starting_x, self.starting_y)
+
+            self.deaths += 1
+            self.set_position(self.starting_x, self.starting_y)
