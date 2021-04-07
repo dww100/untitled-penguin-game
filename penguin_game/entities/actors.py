@@ -377,7 +377,9 @@ class Enemy(Actor):
             move_right_images=move_right_images,
         )
 
+        self.initial_stopped_by = list(self.stopped_by)
         self.stopped_by.append(game.blocks)
+        self.reset_stopped_by = list(self.stopped_by)
         self.killed_by.append(game.moving_blocks)
 
         self.point_value = point_value
@@ -452,6 +454,11 @@ class Enemy(Actor):
             self.deaths += 1
             self.set_position(self.starting_x, self.starting_y)
             self.respawn_timer = 5
+            self.stopped_by = self.initial_stopped_by
 
         elif self.respawn_timer is not None:
-            self.respawn_timer -= 1
+            if self.respawn_timer == 0:
+                self.respawn_timer = None
+            elif not self.killed:
+                self.respawn_timer -= 1
+                self.stopped_by = self.reset_stopped_by
