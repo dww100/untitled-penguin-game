@@ -44,7 +44,9 @@ BLOCK_SPEED = 1
 
 # Time limit for level completion in seconds
 TIME_LIMIT = 120
+
 ENEMY_CLEARANCE_BONUS = 1000
+DIAMOND_LINEUP_BONUS = 5000
 
 # Enemy settings
 ENEMY_SPEED = 0.3

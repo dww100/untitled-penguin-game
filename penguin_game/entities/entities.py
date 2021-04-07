@@ -138,6 +138,7 @@ class Actor(BaseEntity):
         self.original_colour = colour
 
         self.stopped_by = [self.game.walls]
+        self.stopped = False
         self.killed_by = []
         self.killed = False
 
@@ -238,7 +239,10 @@ class Actor(BaseEntity):
         Handles movement and wall collisions.
         """
         # Scale movement to ensure reliable frame rate.
+
         self.pos += self.vel * self.game.dt
+
+        moving_start = self.vel != Vector2(0,0)
 
         if self.snap_to_grid:
             if self.vel.x == 0:
@@ -258,10 +262,14 @@ class Actor(BaseEntity):
 
         self.killed = self.check_fatal_collisions()
 
+        self.stopped = False
+
         if not self.killed:
             for stopper in self.stopped_by:
-                self.collide_and_stop(stopper, Axis.X)
-                self.collide_and_stop(stopper, Axis.Y)
+                stopped_x = self.collide_and_stop(stopper, Axis.X)
+                stopped_y = self.collide_and_stop(stopper, Axis.Y)
+                if (stopped_x or stopped_y) and moving_start:
+                    self.stopped = True
 
 
 class ScoreMarker(pg.sprite.Sprite):

@@ -18,6 +18,7 @@ from penguin_game.settings import (
     ENEMY_IQ,
     ENEMY_KILL_POINTS,
     EGG_BREAK_POINTS,
+    DIAMOND_LINEUP_BONUS,
 )
 from .entities import Actor, Wall, ScoreMarker
 
@@ -58,6 +59,7 @@ class Block(Actor):
         game: "penguin_game.game.Game",
         x: int,
         y: int,
+        additional_groups: Union[pg.sprite.Group, List[pg.sprite.Group], None] = None,
         images: Optional[List[pg.Surface]] = None,
     ) -> None:
         """Block Sprite.
@@ -66,6 +68,7 @@ class Block(Actor):
             game: Game that this Sprite is associated with (provides access to timing, etc).
             x: Horizontal starting position in pixels.
             y: Vertical starting position in pixels.
+            additional_groups: Sprite groups other than `game.all_sprites` and `game.blocks` to be associated with.
             images: Is this a diamond?
         """
 
@@ -76,11 +79,18 @@ class Block(Actor):
         else:
             static_images = images
 
+        if additional_groups is None:
+            additional_groups = game.blocks
+        if isinstance(additional_groups, list):
+            additional_groups += [game.blocks]
+        else:
+            additional_groups = [additional_groups, game.blocks]
+
         super().__init__(
             game,
             x,
             y,
-            additional_groups=game.blocks,
+            additional_groups=additional_groups,
             move_up_images=static_images,
             move_down_images=static_images,
             move_left_images=static_images,
@@ -138,9 +148,7 @@ class Diamond(Block):
     id = "3"
     text_name = "Diamond"
 
-    def __init__(
-        self, game: "penguin_game.game.Game", x: int, y: int, diamond=False
-    ) -> None:
+    def __init__(self, game: "penguin_game.game.Game", x: int, y: int) -> None:
         """Diamond Sprite - unbreakable block.
 
         TODO: Make lining up three give a bonus.
@@ -149,7 +157,6 @@ class Diamond(Block):
             game: Game that this Sprite is associated with (provides access to timing, etc).
             x: Horizontal starting position in pixels.
             y: Vertical starting position in pixels.
-            diamond: Is this a diamond?
         """
 
         static_images = [
@@ -157,13 +164,41 @@ class Diamond(Block):
         ]
 
         super().__init__(
-            game, x, y, images=static_images,
+            game, x, y, images=static_images, additional_groups=game.diamonds
         )
-
-        self.groups.append(game.diamonds)
 
     def blocked_push_response(self) -> None:
         pass
+
+    def update(self) -> None:
+
+        super().update()
+
+        if self.stopped:
+
+            LOGGER.debug("STOPPED")
+            # Check for aligned diamonds
+            n_diamonds = len(self.game.diamonds)
+            hits = [
+                len(
+                    pg.sprite.spritecollide(
+                        s,
+                        self.game.diamonds,
+                        False,
+                        collided=pg.sprite.collide_rect_ratio(1.2),
+                    )
+                )
+                == n_diamonds
+                for s in self.game.diamonds
+            ]
+
+            LOGGER.debug(f"HITS: {hits}")
+            if any(hits):
+                self.game.score += DIAMOND_LINEUP_BONUS
+                score_marker = ScoreMarker(
+                    DIAMOND_LINEUP_BONUS, x=self.rect.x, y=self.rect.y, start_size=75, steps=10
+                )
+                self.game.all_sprites.add(score_marker)
 
 
 class EggBlock(Block):
