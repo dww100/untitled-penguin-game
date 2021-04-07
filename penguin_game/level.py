@@ -16,10 +16,6 @@ class Level(object):
         self.element_height = None
         self.element_width = None
 
-        # height, width = self.validate_input(self.fname)
-        # self.height = height + 2
-        # self.width = width + 2
-
     @property
     def grid_width(self):
         if self.element_width is not None:
