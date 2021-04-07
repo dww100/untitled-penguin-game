@@ -389,6 +389,8 @@ class Enemy(Actor):
         self.starting_x = x
         self.starting_y = y
 
+        self.respawn_timer = None
+
     def choose_new_direction(self, init_facing):
         turn_options = [self.facing * -1]
         if self.facing.x == 0:
@@ -438,7 +440,7 @@ class Enemy(Actor):
         else:
             self.update_animation()
 
-        if self.killed:
+        if self.respawn_timer is None and self.killed:
 
             play_sound(self.game.sounds["death_enemy"])
 
@@ -449,3 +451,7 @@ class Enemy(Actor):
 
             self.deaths += 1
             self.set_position(self.starting_x, self.starting_y)
+            self.respawn_timer = 5
+
+        elif self.respawn_timer is not None:
+            self.respawn_timer -= 1
