@@ -17,6 +17,8 @@ from penguin_game.settings import (
     ENEMY_SPEED,
     ENEMY_IQ,
     ENEMY_KILL_POINTS,
+    STUNNED_TIME,
+    RESPAWN_IMMUNITY,
     EGG_BREAK_POINTS,
     DIAMOND_LINEUP_BONUS,
 )
@@ -197,6 +199,8 @@ class Diamond(Block):
                     DIAMOND_LINEUP_BONUS, x=self.rect.x, y=self.rect.y, start_size=75, steps=10
                 )
                 self.game.all_sprites.add(score_marker)
+                for enemy in self.game.enemies:
+                    enemy.stun()
 
 
 class EggBlock(Block):
@@ -331,6 +335,8 @@ class Player(Actor):
 
         if [h for h in hits if is_actor_neighbour_in_direction(self, h, self.facing)]:
             play_sound(self.game.sounds["electric"])
+            for enemy in self.game.enemies:
+                enemy.stun(wall_check=True)
 
     def death_update(self) -> None:
         """Update the death times and image shown after player dies.
@@ -414,6 +420,7 @@ class Enemy(Actor):
         self.stopped_by.append(game.blocks)
         self.reset_stopped_by = list(self.stopped_by)
         self.killed_by.append(game.moving_blocks)
+        self.initial_killed_by = list(self.killed_by)
 
         self.point_value = point_value
 
@@ -425,6 +432,12 @@ class Enemy(Actor):
         self.starting_y = y
 
         self.respawn_timer = None
+
+        self.stunned_timer = None
+        self.stunned_images = [
+            pg.image.load(path.join(image_dir, "poo1.png")).convert_alpha(),
+            pg.image.load(path.join(image_dir, "poo2.png")).convert_alpha()
+        ]
 
     def choose_new_direction(self, init_facing):
         turn_options = [self.facing * -1]
@@ -458,40 +471,96 @@ class Enemy(Actor):
         else:
             return random_turn
 
+    def stun_update(self) -> None:
+        """Update the death times and image shown after player dies.
+        """
+        self.stunned_timer -= 1
+
+        frame = (self.stunned_timer // 10) % len(self.stunned_images)
+        LOGGER.debug(frame)
+        self.image = self.stunned_images[frame]
+
+        if self.stunned_timer == 0:
+            self.stunned_timer = None
+            self.game.stunned_enemies.remove(self)
+            self.game.enemies.add(self)
+            self.killed_by = self.initial_killed_by
+
+    def stun(self, wall_check=False):
+
+        if wall_check:
+            # Is enemy beside the wall
+            apply = pg.sprite.spritecollide(self, self.game.walls, False, collided=pg.sprite.collide_rect_ratio(1.2))
+        else:
+            apply = True
+
+        if apply:
+            self.stunned_timer = STUNNED_TIME
+
+            self.game.enemies.remove(self)
+            self.game.stunned_enemies.add(self)
+
+            self.vel = Vector2(0, 0)
+
+            player_group = pg.sprite.Group()
+            player_group.add(self.game.player)
+            self.killed_by = [player_group]
+
+    def die_and_respawn(self, score_multiplier: int = 1):
+
+        play_sound(self.game.sounds["death_enemy"])
+
+        # Reset for case where death is in stunned state
+        self.killed_by = self.initial_killed_by
+
+        added_score = self.point_value * score_multiplier
+
+        self.game.score += added_score
+        score_marker = ScoreMarker(self.point_value, x=self.rect.x, y=self.rect.y)
+
+        self.game.all_sprites.add(score_marker)
+
+        self.deaths += 1
+        self.set_position(self.starting_x, self.starting_y)
+        self.respawn_timer = RESPAWN_IMMUNITY
+        self.stopped_by = self.initial_stopped_by
+        self.killed_by = self.initial_killed_by
+
     def update(self) -> None:
 
         init_facing = self.facing
 
         super().update()
 
-        # Being stopped means the enemy has collided with something
-        # -  Therefore need to change direction
-        if not self.vel.magnitude():
-            self.facing = self.choose_new_direction(init_facing)
-            self.vel = self.facing * ENEMY_SPEED
+        if self.stunned_timer is not None:
 
-            self.update_animation(direction_change=True)
+            self.stun_update()
+
+            if self.killed:
+                self.die_and_respawn(score_multiplier=2)
+                self.image = self.move_down_images[0]
+                self.stunned_timer = None
 
         else:
-            self.update_animation()
 
-        if self.respawn_timer is None and self.killed:
+            # Being stopped means the enemy has collided with something
+            # -  Therefore need to change direction
+            if not self.vel.magnitude():
+                self.facing = self.choose_new_direction(init_facing)
+                self.vel = self.facing * ENEMY_SPEED
 
-            play_sound(self.game.sounds["death_enemy"])
+                self.update_animation(direction_change=True)
 
-            self.game.score += self.point_value
-            score_marker = ScoreMarker(self.point_value, x=self.rect.x, y=self.rect.y)
+            else:
+                self.update_animation()
 
-            self.game.all_sprites.add(score_marker)
+            if self.respawn_timer is None and self.killed:
 
-            self.deaths += 1
-            self.set_position(self.starting_x, self.starting_y)
-            self.respawn_timer = 5
-            self.stopped_by = self.initial_stopped_by
+                self.die_and_respawn()
 
-        elif self.respawn_timer is not None:
-            if self.respawn_timer == 0:
-                self.respawn_timer = None
-            elif not self.killed:
-                self.respawn_timer -= 1
-                self.stopped_by = self.reset_stopped_by
+            elif self.respawn_timer is not None:
+                if self.respawn_timer == 0:
+                    self.respawn_timer = None
+                elif not self.killed:
+                    self.respawn_timer -= 1
+                    self.stopped_by = self.reset_stopped_by

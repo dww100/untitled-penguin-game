@@ -78,6 +78,7 @@ class Game:
         self.diamonds = None
         self.moving_blocks = None
         self.enemies = None
+        self.stunned_enemies = None
         self.score = None
         self.lives = None
         self.start_ticks = None
@@ -120,6 +121,7 @@ class Game:
         self.diamonds = pg.sprite.Group()
         self.moving_blocks = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
+        self.stunned_enemies = pg.sprite.Group()
 
         # level = Level(path.join(level_dir, '1.txt'))
         level = Level(path.join(level_dir, 'c64_level1.txt'))
