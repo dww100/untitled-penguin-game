@@ -477,7 +477,6 @@ class Enemy(Actor):
         self.stunned_timer -= 1
 
         frame = (self.stunned_timer // 10) % len(self.stunned_images)
-        LOGGER.debug(frame)
         self.image = self.stunned_images[frame]
 
         if self.stunned_timer == 0:
