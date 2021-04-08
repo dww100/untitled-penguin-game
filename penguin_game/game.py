@@ -16,10 +16,12 @@ from .settings import (
     TILE_SIZE,
     BG_COLOR,
     RED,
-    YELLOW,
     LIGHT_GREY,
     WHITE,
     TITLE,
+    TIME_LIMIT,
+    START_LIVES,
+    ENEMY_CLEARANCE_BONUS
 )
 
 from .entities import Wall
@@ -30,11 +32,20 @@ image_dir = path.join(path.dirname(__file__), 'images')
 sound_dir = path.join(path.dirname(__file__), 'sounds')
 level_dir = path.join(path.dirname(__file__), 'levels')
 
+TIMER = pg.USEREVENT + 1
+
 
 class State(Enum):
     MENU = 1
     PLAY = 2
     GAME_OVER = 3
+
+
+class InGameState(Enum):
+    READY = 1
+    RUNNING = 2
+    COMPLETE = 3
+    DIED = 4
 
 
 class Game:
@@ -64,11 +75,22 @@ class Game:
         self.walls = None
         self.player = None
         self.blocks = None
+        self.diamonds = None
         self.moving_blocks = None
         self.enemies = None
+        self.stunned_enemies = None
         self.score = None
+        self.lives = None
+        self.start_ticks = None
+        self.timer = None
+        self.display_timer = None
+        self.target_no_kills = None
+
+        self.kill_bonus = None
+        self.diamond_bonus = None
 
         self.state = State.MENU
+        self.game_state = None
 
         self.sounds = {
             'swoosh': (pg.mixer.Sound(path.join(sound_dir, 'swoosh.wav')), 0),
@@ -81,23 +103,39 @@ class Game:
         self.sounds['death_enemy'][0].set_volume(0.6)
         self.sounds['electric'][0].set_volume(0.2)
 
-    def setup_play(self):
+    def setup_play(self, reset=False):
         """Initialize variables and setup for new game.
         """
-        self.score = 0
+
+        if reset:
+            for sprite in self.all_sprites:
+                sprite.kill()
+        else:
+            self.score = 0
+            self.lives = START_LIVES
+            self.game_state = InGameState.READY
+
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.blocks = pg.sprite.Group()
         self.diamonds = pg.sprite.Group()
         self.moving_blocks = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
+        self.stunned_enemies = pg.sprite.Group()
 
-        level = Level(path.join(level_dir, '1.txt'))
+        # level = Level(path.join(level_dir, '1.txt'))
+        level = Level(path.join(level_dir, 'c64_level1.txt'))
         level.load_level(self)
-
         LOGGER.debug(f"No. enemies: {len(self.enemies)}, No. blocks: {len(self.blocks)}")
 
         self.make_boundary_wall(level.grid_height, level.grid_width)
+
+        self.timer = TIME_LIMIT
+        pg.time.set_timer(TIMER, 1000)
+
+        self.target_no_kills = 5
+        self.kill_bonus = None
+        self.diamond_bonus = None
 
     def make_boundary_wall(self, height, width) -> None:
         """Create boundary for `Wall` Sprites around game grid.
@@ -208,24 +246,84 @@ class Game:
         pg.mixer.music.play(-1, fade_ms=1000)
 
         while self.state == State.PLAY:
+
             # Using clock.tick each loop ensures framerate is limited to target FPS
             self.dt = self.clock.tick(FPS)
 
             self.events()
-            self.update()
-            self.draw()
 
-            if self.player.death_timer == 0:
-                if self.player.lives == 0:
-                    self.state = State.GAME_OVER
-                else:
-                    self.player.reset()
+            if self.game_state == InGameState.READY:
+
+                state_text = "READY!"
+
+                if self.display_timer is None:
+                    self.display_timer = 1
+
+                elif self.display_timer == 0:
+                    self.display_timer = None
+                    self.game_state = InGameState.RUNNING
+
+            elif self.game_state == InGameState.COMPLETE:
+
+                state_text = "You survived!"
+
+                if self.display_timer is None:
+                    self.display_timer = 1
+
+                elif self.display_timer == 0:
+                    self.display_timer = None
+                    self.setup_play(reset=True)
+                    self.game_state = InGameState.READY
+
+            else:
+
+                self.update()
+
+                if self.display_timer is None:
+                    state_text = None
+                elif self.display_timer == self.timer:
+                    self.display_timer = None
+
+                if self.player.death_timer == 0:
+                    if self.lives == 0:
+                        self.state = State.GAME_OVER
+                    else:
+                        self.setup_play(reset=True)
+                        self.game_state = InGameState.READY
+
+                if self.kill_bonus is None:
+
+                    if self.no_kills() >= self.target_no_kills:
+
+                        self.display_timer = self.timer - 2
+
+                        half_time = TIME_LIMIT // 2
+                        if self.timer >= half_time:
+                            self.kill_bonus = (self.timer - half_time) // 10 * ENEMY_CLEARANCE_BONUS
+                            state_text = f"Kill bonus: {self.kill_bonus}"
+                        else:
+                            self.kill_bonus = 0
+                            state_text = f"Too slow - No kill bonus"
+
+                if self.timer == 0:
+                    self.game_state = InGameState.COMPLETE
+
+            self.draw(state_text=state_text)
+
+    def no_kills(self):
+        return sum([e.deaths for e in self.enemies])
 
     def events(self) -> None:
         """Handle events - key presses etc.
         """
 
         for event in pg.event.get():
+            if event.type == TIMER:
+                if self.game_state == InGameState.RUNNING:
+                    self.timer -= 1
+                else:
+                    self.display_timer -= 1
+
             if event.type == pg.QUIT:
                 self.quit()
             if event.type == pg.KEYDOWN:
@@ -252,7 +350,7 @@ class Game:
 
         icon_size = INFO_HEIGHT - 6
 
-        for i in range(self.player.lives):
+        for i in range(self.lives):
             life_icon = pg.image.load(
                 path.join(image_dir, f"pengo_left.png")
             ).convert_alpha()
@@ -262,9 +360,26 @@ class Game:
             life_rect.y = 3
             self.screen.blit(life_icon, life_rect)
 
-        self.draw_text(f"Score: {self.score}", size=24, color=WHITE, x=WIDTH//2, y=6)
+        no_kills = self.no_kills()
+        if no_kills >= self.target_no_kills:
+            remaining_kills = 0
+        else:
+            remaining_kills = self.target_no_kills - no_kills
 
-    def draw(self) -> None:
+        self.draw_text("Kill target:", size=24, color=WHITE, x=WIDTH//2 - 250, y=6)
+        self.draw_text(f"{remaining_kills}", size=24, color=WHITE, x=WIDTH//2 - 170, y=6)
+
+        self.draw_text("Score:", size=24, color=WHITE, x=WIDTH//2 - 50, y=6)
+        self.draw_text(f"{self.score}", size=24, color=WHITE, x=WIDTH//2 + 50, y=6)
+
+        self.draw_text("Time:", size=24, color=WHITE, x=WIDTH//2 + 150, y=6)
+        if self.timer > 0:
+            time = self.timer
+        else:
+            time = 0
+        self.draw_text(f"{time}", size=24, color=WHITE, x=WIDTH // 2 + 210, y=6)
+
+    def draw(self, state_text: Optional[str] = None) -> None:
         """Draw new frame to the screen.
         """
         self.screen.fill(BG_COLOR)
@@ -272,4 +387,6 @@ class Game:
             self.draw_grid()
         self.draw_info()
         self.all_sprites.draw(self.screen)
+        if state_text is not None:
+            self.draw_text(state_text, 75, WHITE, WIDTH // 2, HEIGHT // 2)
         pg.display.flip()

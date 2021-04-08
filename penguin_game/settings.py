@@ -16,11 +16,11 @@ FPS = 60
 
 TILE_SIZE = 64
 # Dimensions of the game space in tiles
-MAX_GRID_WIDTH = 12
-MAX_GRID_HEIGHT = 12
+MAX_GRID_WIDTH = 20
+MAX_GRID_HEIGHT = 20
 
 # Dimensions of the game space in tiles
-GRID_WIDTH = 12
+GRID_WIDTH = 17
 GRID_HEIGHT = 12
 # Dimensions of the game space in pixels
 WIDTH = GRID_WIDTH * TILE_SIZE
@@ -33,13 +33,27 @@ SHOW_GRID = False
 INFO_HEIGHT = 32
 
 # Player settings
+START_LIVES = 2
 PLAYER_SPEED = 0.5
-DEATH_TIME = 30
+DEATH_TIME = 60
 
 # Block settings
-BLOCK_SPEED = 0.5
+BLOCK_SPEED = 1
+
+# Game settings
+
+# Time limit for level completion in seconds
+TIME_LIMIT = 120
+
+ENEMY_CLEARANCE_BONUS = 1000
+DIAMOND_LINEUP_BONUS = 5000
 
 # Enemy settings
 ENEMY_SPEED = 0.3
 ENEMY_IQ = 0.5  # zero to one
 ENEMY_KILL_POINTS = 200
+STUNNED_TIME = 300
+RESPAWN_IMMUNITY = 5
+
+# Egg settings
+EGG_BREAK_POINTS = 400

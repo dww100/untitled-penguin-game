@@ -8,10 +8,12 @@ import pygame as pg
 from pygame.sprite import Sprite
 from pygame.math import Vector2
 
-from .settings import TILE_SIZE, GREEN, WHITE, BLACK, INFO_HEIGHT
-from .utils import play_sound
+from penguin_game.settings import TILE_SIZE, GREEN, WHITE, BLACK, INFO_HEIGHT
+from penguin_game.utils import play_sound
 
 LOGGER = logging.getLogger(__name__)
+
+ENTITIES = {}
 
 
 class Axis(Enum):
@@ -19,7 +21,26 @@ class Axis(Enum):
     Y = 1
 
 
-class Wall(Sprite):
+class BaseEntity(Sprite):
+    id = None
+    text_name = ''
+
+    def __init_subclass__(cls, *args, **kwargs):
+        """
+        Catch any new scoring functions (all entities must inherit
+        from this base class) and add them to the dict of entities.
+        """
+        super().__init_subclass__(**kwargs)
+
+        if cls.id is not None:
+            # Register new entity
+            ENTITIES[cls.id] = cls
+
+
+class Wall(BaseEntity):
+    id = '0'
+    text_name = 'Wall'
+
     def __init__(self, game: "penguin_game.game.Game", x: int, y: int) -> None:
         """Sprite class to describe bounding wall elements.
 
@@ -44,7 +65,7 @@ class Wall(Sprite):
         play_sound(self.game.sounds['electric'])
 
 
-class Actor(Sprite):
+class Actor(BaseEntity):
     def __init__(
         self,
         game: "penguin_game.game.Game",
@@ -65,7 +86,7 @@ class Actor(Sprite):
             x: Horizontal starting position in pixels.
             y: Vertical starting position in pixels.
             additional_groups: Sprite groups other than `game.all_sprites` to be associated with.
-            colour: Colour tos use to fill place holder rect.
+            colour: Colour to use to fill place holder rect.
         """
 
         if additional_groups is None:
@@ -80,6 +101,8 @@ class Actor(Sprite):
         self.game = game
 
         self.facing = initial_direction
+
+        self.frozen = False
 
         self.animation_frame = 0
         self.last_update = 0
@@ -104,11 +127,8 @@ class Actor(Sprite):
             self.image = move_down_images[0]
 
         self.rect = self.image.get_rect()
-        self.rect.x = x * TILE_SIZE
-        self.rect.y = y * TILE_SIZE
-        self.rect.y += INFO_HEIGHT
-        self.pos = Vector2(x, y) * TILE_SIZE
-        self.pos.y += INFO_HEIGHT
+        self.pos = Vector2(0, 0)
+        self.set_position(x, y)
 
         self.snap_to_grid = True
 
@@ -118,8 +138,16 @@ class Actor(Sprite):
         self.original_colour = colour
 
         self.stopped_by = [self.game.walls]
+        self.stopped = False
         self.killed_by = []
         self.killed = False
+
+    def set_position(self, x, y):
+        self.rect.x = x * TILE_SIZE
+        self.rect.y = y * TILE_SIZE
+        self.rect.y += INFO_HEIGHT
+        self.pos = Vector2(x, y) * TILE_SIZE
+        self.pos.y += INFO_HEIGHT
 
     def collide_and_stop(
         self, check_group: pg.sprite.Group, direction: Axis = Axis.X
@@ -211,7 +239,10 @@ class Actor(Sprite):
         Handles movement and wall collisions.
         """
         # Scale movement to ensure reliable frame rate.
+
         self.pos += self.vel * self.game.dt
+
+        moving_start = self.vel != Vector2(0,0)
 
         if self.snap_to_grid:
             if self.vel.x == 0:
@@ -231,10 +262,14 @@ class Actor(Sprite):
 
         self.killed = self.check_fatal_collisions()
 
+        self.stopped = False
+
         if not self.killed:
             for stopper in self.stopped_by:
-                self.collide_and_stop(stopper, Axis.X)
-                self.collide_and_stop(stopper, Axis.Y)
+                stopped_x = self.collide_and_stop(stopper, Axis.X)
+                stopped_y = self.collide_and_stop(stopper, Axis.Y)
+                if (stopped_x or stopped_y) and moving_start:
+                    self.stopped = True
 
 
 class ScoreMarker(pg.sprite.Sprite):
@@ -243,6 +278,7 @@ class ScoreMarker(pg.sprite.Sprite):
         # Call the parent class (Sprite) constructor
         pg.sprite.Sprite.__init__(self)
         self.text_size = start_size
+        self.color = color
         self.score = score
 
         self.x = x
@@ -261,7 +297,7 @@ class ScoreMarker(pg.sprite.Sprite):
         self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
         self.image.set_colorkey(BLACK)
         font = pg.font.Font(pg.font.get_default_font(), int(self.text_size))
-        text_surface = font.render(str(self.score), 1, WHITE)
+        text_surface = font.render(str(self.score), 1, self.color)
         text_width = text_surface.get_width()
         text_height = text_surface.get_height()
         self.image.blit(text_surface, [TILE_SIZE/2 - text_width/2, TILE_SIZE/2 - text_height/2])
