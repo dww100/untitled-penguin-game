@@ -292,7 +292,8 @@ class Game:
                         self.game_state = InGameState.READY
 
                 if self.kill_bonus is None:
-                    if sum([e.deaths for e in self.enemies]) == self.target_no_kills:
+
+                    if self.no_kills() >= self.target_no_kills:
 
                         self.display_timer = self.timer - 2
 
@@ -308,6 +309,9 @@ class Game:
                     self.game_state = InGameState.COMPLETE
 
             self.draw(state_text=state_text)
+
+    def no_kills(self):
+        return sum([e.deaths for e in self.enemies])
 
     def events(self) -> None:
         """Handle events - key presses etc.
@@ -355,6 +359,15 @@ class Game:
             life_rect.x = (INFO_HEIGHT - 2) * i
             life_rect.y = 3
             self.screen.blit(life_icon, life_rect)
+
+        no_kills = self.no_kills()
+        if no_kills >= self.target_no_kills:
+            remaining_kills = 0
+        else:
+            remaining_kills = self.target_no_kills - no_kills
+
+        self.draw_text("Kill target:", size=24, color=WHITE, x=WIDTH//2 - 250, y=6)
+        self.draw_text(f"{remaining_kills}", size=24, color=WHITE, x=WIDTH//2 - 170, y=6)
 
         self.draw_text("Score:", size=24, color=WHITE, x=WIDTH//2 - 50, y=6)
         self.draw_text(f"{self.score}", size=24, color=WHITE, x=WIDTH//2 + 50, y=6)
