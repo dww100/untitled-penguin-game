@@ -272,10 +272,12 @@ class Player(Actor):
                 ).convert_alpha()
             )
         move_left_images = [
-            pg.image.load(path.join(image_dir, f"pengo_left.png")).convert_alpha()
+            pg.image.load(path.join(image_dir, f"pengo_left.png")).convert_alpha(),
+            pg.image.load(path.join(image_dir, f"pengo_left2.png")).convert_alpha(),
         ]
         move_right_images = [
-            pg.image.load(path.join(image_dir, f"pengo_right.png")).convert_alpha()
+            pg.image.load(path.join(image_dir, f"pengo_right.png")).convert_alpha(),
+            pg.image.load(path.join(image_dir, f"pengo_right2.png")).convert_alpha(),
         ]
 
         super().__init__(
