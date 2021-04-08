@@ -1,4 +1,22 @@
-. : (space) Air space
-0: Block
+# Simple text format for level layout
+
+Provide a N by M grid of characters to define the level.
+The information below shows the original character map and how updated maps
+ are created when new object types are added.
+
+## Original
+
+The original format contains the following objects:
+
+. : Nothing
+0: Wall
 1: Player start
-2: Enemy
+2: Block
+3: Diamond
+4: EggBlock
+5: Enemy
+
+## Updates
+
+New objects are registered in the `entities.Entities` dictionary.
+The `_id` attribute of the entity provides the key in the dictionary.
