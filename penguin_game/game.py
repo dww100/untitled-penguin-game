@@ -8,6 +8,7 @@ import pygame as pg
 
 from .level import Level
 from .settings import (
+    HIGHSCORE_FILE,
     HEIGHT,
     WIDTH,
     INFO_HEIGHT,
@@ -21,7 +22,7 @@ from .settings import (
     TITLE,
     TIME_LIMIT,
     START_LIVES,
-    ENEMY_CLEARANCE_BONUS
+    ENEMY_CLEARANCE_BONUS,
 )
 
 from .entities import Wall
@@ -75,6 +76,7 @@ class Game:
         game_state (Optional[InGameState]):  Current game state - regular play = InGameState.RUNNING.
         state (State): What state is the program in - MENU, PLAY or GAME_OVER [default/start vale = State.Menu].
         sounds (Dict[str, Tuple[pg.mixer.Sound, int]): Sounds to be used in game.
+        high_score (int): High score
     """
 
     def __init__(self):
@@ -119,6 +121,14 @@ class Game:
         self.sounds['death_self'][0].set_volume(0.2)
         self.sounds['death_enemy'][0].set_volume(0.6)
         self.sounds['electric'][0].set_volume(0.2)
+
+        self.high_score = 0
+        self.load_highscore()
+
+    def load_highscore(self):
+        if path.exists(HIGHSCORE_FILE):
+            with open(HIGHSCORE_FILE) as f:
+                self.high_score = int(f.read())
 
     def setup_play(self, reset=False):
         """Initialize variables and setup for new game.
@@ -233,9 +243,31 @@ class Game:
     def show_game_over_screen(self) -> None:
         """Show a game over screen and allow game to be restarted.
         """
+
+        if self.score > self.high_score:
+            with open(HIGHSCORE_FILE, 'w') as f:
+                f.write(str(self.score))
+
+            message = f"Well done - new high score: {self.score}"
+
+        elif self.score == self.high_score:
+
+            if self.score == 0:
+                message = "What is this nonsense - you scored nothing!"
+            else:
+                message = f"Well done - you equalled high score: {self.score}"
+
+        else:
+
+            message = f"Sad times - no new high score ({self.high_score}), you got {self.score}"
+
         self.screen.fill(RED)
         self.draw_text(TITLE, 48, WHITE, WIDTH / 2, HEIGHT / 4)
+
         self.draw_text("Game Over", 22, WHITE, WIDTH / 2, HEIGHT / 2)
+        self.draw_text(message, 22, WHITE, WIDTH / 2, HEIGHT / 2 + 50)
+
+
         self.draw_text("Press a key to return to menu", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
         self.draw_text("Esc to Quit", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4 + 30)
         pg.display.flip()
@@ -387,24 +419,26 @@ class Game:
             life_rect.y = 3
             self.screen.blit(life_icon, life_rect)
 
+        self.draw_text("Time:", size=24, color=WHITE, x=WIDTH//2 - 400, y=6)
+        if self.timer > 0:
+            time = self.timer
+        else:
+            time = 0
+        self.draw_text(f"{time}", size=24, color=WHITE, x=WIDTH // 2 - 340, y=6)
+
         no_kills = self.no_kills()
         if no_kills >= self.target_no_kills:
             remaining_kills = 0
         else:
             remaining_kills = self.target_no_kills - no_kills
 
-        self.draw_text("Kill target:", size=24, color=WHITE, x=WIDTH//2 - 250, y=6)
-        self.draw_text(f"{remaining_kills}", size=24, color=WHITE, x=WIDTH//2 - 170, y=6)
+        self.draw_text("Kill target:", size=24, color=WHITE, x=WIDTH//2 - 230, y=6)
+        self.draw_text(f"{remaining_kills}", size=24, color=WHITE, x=WIDTH//2 - 150, y=6)
 
         self.draw_text("Score:", size=24, color=WHITE, x=WIDTH//2 - 50, y=6)
         self.draw_text(f"{self.score}", size=24, color=WHITE, x=WIDTH//2 + 50, y=6)
 
-        self.draw_text("Time:", size=24, color=WHITE, x=WIDTH//2 + 150, y=6)
-        if self.timer > 0:
-            time = self.timer
-        else:
-            time = 0
-        self.draw_text(f"{time}", size=24, color=WHITE, x=WIDTH // 2 + 210, y=6)
+        self.draw_text(f"High Score: {self.high_score}", size=24, color=WHITE, x=(3 * WIDTH) // 4, y=6)
 
     def draw(self, state_text: Optional[str] = None) -> None:
         """Draw new frame to the screen.

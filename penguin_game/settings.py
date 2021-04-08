@@ -1,3 +1,5 @@
+from os import path
+
 TITLE = "Untitled Penguin Game"
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)
@@ -10,6 +12,8 @@ YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
 
 BG_COLOR = DARK_GREY
+
+HIGHSCORE_FILE = path.join(path.dirname(__file__), 'highscore.txt')
 
 # Target framerate
 FPS = 60
