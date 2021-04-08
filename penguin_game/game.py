@@ -57,7 +57,24 @@ class Game:
         dt (Optional[int]): Size of time increment (framerate in ms/ 1000) [None outside game loop].
         all_sprites (Optional[pg.sprite.Group]): Group of all game sprite [None outside game loop].
         walls (Optional[pg.sprite.Group]): Group of sprites defining edge of game area [None outside game loop].
-        state (State): What state is the game in - MENU, PLAY or GAME_OVER.
+        blocks (Optional[pg.sprite.Group]): Group of sprites containing - standard `Block`s, `Diamond`s and `EggBlock`s.
+        diamonds (Optional[pg.sprite.Group]): Group of sprites containing `Diamond` blocks only.
+        blocks (Optional[pg.sprite.Group]): Group of sprites containing - any `Block`s, `Diamond`s or `EggBlock`s that
+                                            are currently moving in the game.
+        enemies (Optional[pg.sprite.Group]): Group of sprites containing all Enemies.
+        stunned_enemies (Optional[pg.sprite.Group]): Group of sprites containing all Enemies in the stunned state.
+        score (Optional[int]): Players current score.
+        lives (Optional[int]): Players current remaining lives.
+        start_ticks (Optional[int]): Ticks value at start of game.
+        timer (Optional[int]): Current level timer.
+        display_timer (Optional[int]): Timer used for messages displayed to the player over game area.
+        target_no_kills (Optional[int]): Number of kills needed to get a bonus on this level.
+        kill_bonus (Optional[int]): Number of points awarded for kills on this level (0 = kills after time limit,
+                                    None that the kill target has not been reached.
+        diamond_bonus (Optional[int]): Number of points awarded for aligning three diamonds.
+        game_state (Optional[InGameState]):  Current game state - regular play = InGameState.RUNNING.
+        state (State): What state is the program in - MENU, PLAY or GAME_OVER [default/start vale = State.Menu].
+        sounds (Dict[str, Tuple[pg.mixer.Sound, int]): Sounds to be used in game.
     """
 
     def __init__(self):
@@ -155,6 +172,8 @@ class Game:
         sys.exit()
 
     def run(self) -> None:
+        """Loop that controls both game and other screens.
+        """
         pg.mixer.init()
         pg.mixer.music.load(path.join(sound_dir, 'theme.wav'))
         pg.mixer.music.set_volume(0.1)
@@ -253,6 +272,7 @@ class Game:
             self.events()
 
             if self.game_state == InGameState.READY:
+                # A pause before the game starts.
 
                 state_text = "READY!"
 
@@ -264,6 +284,7 @@ class Game:
                     self.game_state = InGameState.RUNNING
 
             elif self.game_state == InGameState.COMPLETE:
+                # Player survived the time limit and moves n to next level.
 
                 state_text = "You survived!"
 
@@ -276,6 +297,7 @@ class Game:
                     self.game_state = InGameState.READY
 
             else:
+                # Regular update step
 
                 self.update()
 
@@ -310,7 +332,12 @@ class Game:
 
             self.draw(state_text=state_text)
 
-    def no_kills(self):
+    def no_kills(self) -> int:
+        """Calculate the number of enemies killed in the level so far.
+
+        Returns:
+            Number of enemies killed so far.
+        """
         return sum([e.deaths for e in self.enemies])
 
     def events(self) -> None:
