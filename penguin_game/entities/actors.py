@@ -130,6 +130,8 @@ class Block(Actor):
             self.blocked_push_response()
 
     def blocked_push_response(self) -> None:
+        """Kill self in response to being pushed while a `Block` or `Wall` is a neighbour in the direction of the push.
+        """
         self.kill()
 
     def update(self) -> None:
@@ -153,8 +155,6 @@ class Diamond(Block):
     def __init__(self, game: "penguin_game.game.Game", x: int, y: int) -> None:
         """Diamond Sprite - unbreakable block.
 
-        TODO: Make lining up three give a bonus.
-
         Args:
             game: Game that this Sprite is associated with (provides access to timing, etc).
             x: Horizontal starting position in pixels.
@@ -170,9 +170,15 @@ class Diamond(Block):
         )
 
     def blocked_push_response(self) -> None:
+        """Do nothing in response to being pushed while a `Block` or `Wall` is a neighbour in the direction of the push.
+        """
         pass
 
     def update(self) -> None:
+        """Update state each time round the game loop - includes alignment check.
+        Handles movement and collisions. If moving can squish enemies.
+        If three `Diamond`s line up give a bonus and stun all enemies.
+        """
 
         super().update()
 
@@ -193,12 +199,18 @@ class Diamond(Block):
                 for s in self.game.diamonds
             ]
 
+            # Add bonus and stun if diamonds aligned
             if any(hits):
+
                 self.game.score += DIAMOND_LINEUP_BONUS
+
+                # Add marker to show alignment score
                 score_marker = ScoreMarker(
                     DIAMOND_LINEUP_BONUS, x=self.rect.x, y=self.rect.y, start_size=75, steps=10
                 )
                 self.game.all_sprites.add(score_marker)
+
+                # Stun each enemy in turn
                 for enemy in self.game.enemies:
                     enemy.stun()
 
@@ -224,6 +236,9 @@ class EggBlock(Block):
         self.point_value = EGG_BREAK_POINTS
 
     def blocked_push_response(self) -> None:
+        """Kill self and add score in response to being pushed while a `Block` or `Wall` is a neighbour in the
+        direction of the push.
+        """
         self.game.score += self.point_value
         score_marker = ScoreMarker(self.point_value, x=self.rect.x, y=self.rect.y)
         self.game.all_sprites.add(score_marker)
@@ -348,7 +363,9 @@ class Player(Actor):
         frame = int(self.death_timer / gap) - 1
         self.image = self.death_images[frame]
 
-    def initiate_death_sequence(self):
+    def initiate_death_sequence(self) -> None:
+        """If Player dies remove life, freeze and start a timer for death animation.
+        """
         play_sound(self.game.sounds["death_self"])
         self.game.lives -= 1
         self.frozen = True
@@ -439,7 +456,15 @@ class Enemy(Actor):
             pg.image.load(path.join(image_dir, "poo2.png")).convert_alpha()
         ]
 
-    def choose_new_direction(self, init_facing):
+    def choose_new_direction(self, init_facing: Vector2) -> Vector2:
+        """Choose a new direction for enemy to move.
+
+        Args:
+            init_facing: Current direction of motion.
+
+        Returns:
+            Direction for the enemy to move next.
+        """
         turn_options = [self.facing * -1]
         if self.facing.x == 0:
             turn_options += [Vector2(1, 0), Vector2(-1, 0)]
@@ -482,14 +507,12 @@ class Enemy(Actor):
         if self.stunned_timer == 0:
             self.unstun()
 
-    def unstun(self):
-        self.stunned_timer = None
-        self.killed_by = self.initial_killed_by
-        self.game.stunned_enemies.remove(self)
-        self.game.enemies.add(self)
-        self.killed_by = self.initial_killed_by
+    def stun(self, wall_check=False) -> None:
+        """Put into stunned state (if selected check wall adjacency before applying).
 
-    def stun(self, wall_check=False):
+        Args:
+            wall_check: Should the stun only apply if next to a Wall.
+        """
 
         if wall_check:
             # Is enemy beside the wall
@@ -509,7 +532,21 @@ class Enemy(Actor):
             player_group.add(self.game.player)
             self.killed_by = [player_group]
 
-    def die_and_respawn(self, score_multiplier: int = 1):
+    def unstun(self) -> None:
+        """Take enemy out of stun state.
+        """
+        self.stunned_timer = None
+        self.killed_by = self.initial_killed_by
+        self.game.stunned_enemies.remove(self)
+        self.game.enemies.add(self)
+        self.killed_by = self.initial_killed_by
+
+    def die_and_respawn(self, score_multiplier: int = 1) -> None:
+        """Record death and add score to the player before respawning.
+
+        Args:
+            score_multiplier: Multiply the score added by this factor.
+        """
 
         play_sound(self.game.sounds["death_enemy"])
 
@@ -526,6 +563,8 @@ class Enemy(Actor):
         self.stopped_by = self.initial_stopped_by
 
     def update(self) -> None:
+        """Update state each time round the game loop.
+        """
 
         init_facing = self.facing
 
