@@ -185,7 +185,6 @@ class Diamond(Block):
         if self.stopped:
 
             # Check for aligned diamonds
-            n_diamonds = len(self.game.diamonds)
             hits = [
                 len(
                     pg.sprite.spritecollide(
@@ -195,7 +194,7 @@ class Diamond(Block):
                         collided=pg.sprite.collide_rect_ratio(1.2),
                     )
                 )
-                == n_diamonds
+                == 3
                 for s in self.game.diamonds
             ]
 
