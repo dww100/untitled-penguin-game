@@ -481,10 +481,14 @@ class Enemy(Actor):
         self.image = self.stunned_images[frame]
 
         if self.stunned_timer == 0:
-            self.stunned_timer = None
-            self.game.stunned_enemies.remove(self)
-            self.game.enemies.add(self)
-            self.killed_by = self.initial_killed_by
+            self.unstun()
+
+    def unstun(self):
+        self.stunned_timer = None
+        self.killed_by = self.initial_killed_by
+        self.game.stunned_enemies.remove(self)
+        self.game.enemies.add(self)
+        self.killed_by = self.initial_killed_by
 
     def stun(self, wall_check=False):
 
@@ -510,9 +514,6 @@ class Enemy(Actor):
 
         play_sound(self.game.sounds["death_enemy"])
 
-        # Reset for case where death is in stunned state
-        self.killed_by = self.initial_killed_by
-
         added_score = self.point_value * score_multiplier
 
         self.game.score += added_score
@@ -524,7 +525,6 @@ class Enemy(Actor):
         self.set_position(self.starting_x, self.starting_y)
         self.respawn_timer = RESPAWN_IMMUNITY
         self.stopped_by = self.initial_stopped_by
-        self.killed_by = self.initial_killed_by
 
     def update(self) -> None:
 
@@ -538,8 +538,8 @@ class Enemy(Actor):
 
             if self.killed:
                 self.die_and_respawn(score_multiplier=2)
+                self.unstun()
                 self.image = self.move_down_images[0]
-                self.stunned_timer = None
 
         else:
 
